@@ -29,6 +29,7 @@ struct Token
         IDENTIFIER = 258,
 
         CONST_INT,
+        CONST_STRING,
         CONST_FLOAT,
 
         OP_INC,

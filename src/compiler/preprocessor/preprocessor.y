@@ -94,6 +94,7 @@ static void yyerror(Context* context, const char* reason);
 %}
 
 %token TOK_CONST_INT
+%token TOK_CONST_STRING
 %token TOK_IDENTIFIER
 %left TOK_OP_OR
 %left TOK_OP_AND
@@ -118,6 +119,7 @@ input
 
 expression
     : TOK_CONST_INT
+    | TOK_CONST_STRING
     | TOK_IDENTIFIER {
         if (!context->isIgnoringErrors())
         {
@@ -362,6 +364,10 @@ int yylex(YYSTYPE *lvalp, Context *context)
         type = TOK_CONST_INT;
         break;
       }
+      case angle::pp::Token::CONST_STRING:
+        *lvalp = static_cast<YYSTYPE>(-1);
+        type = TOK_CONST_STRING;
+        break;
       case angle::pp::Token::IDENTIFIER:
         *lvalp = static_cast<YYSTYPE>(-1);
         type = TOK_IDENTIFIER;

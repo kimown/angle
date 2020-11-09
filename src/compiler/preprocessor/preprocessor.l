@@ -155,6 +155,11 @@ FRACTIONAL_CONSTANT  ({DIGIT}*"."{DIGIT}+)|({DIGIT}+".")
     return angle::pp::Token::CONST_INT;
 }
 
+(\".*\") {
+    yylval->assign(yytext, yyleng);
+    return angle::pp::Token::CONST_STRING;
+}
+
 ({DIGIT}+{EXPONENT_PART}[fF]?)|({FRACTIONAL_CONSTANT}{EXPONENT_PART}?[fF]?) {
     yylval->assign(yytext, yyleng);
     return angle::pp::Token::CONST_FLOAT;
