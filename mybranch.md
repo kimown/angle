@@ -43,3 +43,26 @@ python2 scripts/run_code_generation.py
 
 
 gsutil cp gs://chromium-clang-format/buildtools/mac/clang-format.sha1 .
+```
+HEAD detached at 2f2595a
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   scripts/code_generation_hashes/Static_builtins.json
+	modified:   scripts/run_code_generation.py
+	modified:   src/compiler/translator/ImmutableString_ESSL_autogen.cpp
+	modified:   src/compiler/translator/ImmutableString_autogen.cpp
+	modified:   src/compiler/translator/ParseContext_ESSL_autogen.h
+	modified:   src/compiler/translator/ParseContext_complete_autogen.h
+	modified:   src/compiler/translator/SymbolTable_ESSL_autogen.cpp
+	modified:   src/compiler/translator/SymbolTable_autogen.cpp
+	modified:   src/compiler/translator/SymbolTable_autogen.h
+	modified:   src/compiler/translator/builtin_function_declarations.txt
+	modified:   src/compiler/translator/tree_util/BuiltIn_ESSL_autogen.h
+	modified:   src/compiler/translator/tree_util/BuiltIn_complete_autogen.h
+	modified:   src/tests/compiler_tests/ImmutableString_test_ESSL_autogen.cpp
+	modified:   src/tests/compiler_tests/ImmutableString_test_autogen.cpp
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
