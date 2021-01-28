@@ -758,6 +758,7 @@ bool TranslatorVulkan::translateImpl(TIntermBlock *root,
     }
 
     sink << "#version 450 core\n";
+    sink << "#extension GL_EXT_debug_printf : enable\n";
 
     // Write out default uniforms into a uniform block assigned to a specific set/binding.
     int defaultUniformCount           = 0;

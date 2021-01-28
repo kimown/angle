@@ -1899,6 +1899,50 @@ void GlslangGetShaderSource(GlslangSourceOptions &options,
     {
         gl::Shader *glShader            = programState.getAttachedShader(shaderType);
         (*shaderSourcesOut)[shaderType] = glShader ? glShader->getTranslatedSource() : "";
+
+//        char beforeName [20]="";
+//        char afterName [20]="";
+//        char afterName2 [20]="";
+//        if (shaderType==gl::ShaderType::Vertex){
+//                strcpy(beforeName, "file.vert");
+//                strcpy(afterName, "file.vert.vert");
+//                strcpy(afterName2, "file.vert.vert");
+//            } else if(shaderType==gl::ShaderType::Fragment){
+//                strcpy(beforeName, "file.frag");
+//                strcpy(afterName, "file.frag.frag");
+//                strcpy(afterName2, "file.frag.frag");
+//            }
+//        int cStatus = strcmp(beforeName,"");
+//        if(cStatus==0){}else {
+//                FILE *f = fopen(beforeName, "w");
+//                std::string  a = glShader ? glShader->getTranslatedSource() : "";
+//                const char *text =a.c_str();
+//                fprintf(f, "%s", text);
+//                fclose(f);
+//
+//                    char cmd [130];
+//                strcpy(cmd, "node file.js ");
+//                strcat(cmd, beforeName);
+//                strcat(cmd, " ");
+//                strcat(cmd, afterName);
+//                int status233 = system(cmd);
+//                printf("change file ok, %d, %s, %s \n",status233,beforeName,afterName);
+//
+//                    char * buffer = 0;
+//                long length;
+//                FILE * fi = fopen (afterName, "rb");
+//                fseek (fi, 0, SEEK_END);
+//                length = ftell (f);
+//                fseek (fi, 0, SEEK_SET);
+//                buffer = static_cast<char *>(malloc(length+1));
+//                fread (buffer, 1, length, f);
+//                fclose (fi);
+//                buffer[length] = '\0';
+//
+//                    printf("change changed file ok, %s",buffer);
+//
+//                    (*shaderSourcesOut)[shaderType] = buffer;
+//            }
     }
 
     std::string *vertexSource = &(*shaderSourcesOut)[gl::ShaderType::Vertex];

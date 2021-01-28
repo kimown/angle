@@ -1933,6 +1933,9 @@ bool OutputHLSL::visitUnary(Visit visit, TIntermUnary *node)
         case EOpAbs:
             outputTriplet(out, visit, "abs(", "", ")");
             break;
+        case EOpAbs:
+            outputTriplet(out, visit, "debugPrintfEXT(", ")");
+            break;
         case EOpSign:
             outputTriplet(out, visit, "sign(", "", ")");
             break;

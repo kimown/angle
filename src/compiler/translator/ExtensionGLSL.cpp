@@ -52,6 +52,8 @@ void TExtensionGLSL::checkOperator(TIntermOperator *node)
     {
         case EOpAbs:
             break;
+        case EOpDebugPrintfEXT:
+            break;
 
         case EOpSign:
             break;

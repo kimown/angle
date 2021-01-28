@@ -33,6 +33,8 @@ void TranslatorGLSL::initBuiltInFunctionEmulator(BuiltInFunctionEmulator *emu,
     if (compileOptions & SH_EMULATE_ISNAN_FLOAT_FUNCTION)
     {
         InitBuiltInIsnanFunctionEmulatorForGLSLWorkarounds(emu, getShaderVersion());
+    } else {
+      // InitBuiltInIsnanFunctionEmulatorForGLSLWorkarounds(emu, getShaderVersion());
     }
 
     if (compileOptions & SH_EMULATE_ATAN2_FLOAT_FUNCTION)

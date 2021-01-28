@@ -124,6 +124,7 @@ enum TOperator : uint8_t
     EOpInversesqrt,
 
     EOpAbs,
+    EOpDebugPrintfEXT,
     EOpSign,
     EOpFloor,
     EOpTrunc,
@@ -142,6 +143,7 @@ enum TOperator : uint8_t
     EOpIsnan,
     EOpIsinf,
     EOpFma,
+    EOpFma2,
 
     EOpFloatBitsToInt,
     EOpFloatBitsToUint,
