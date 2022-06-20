@@ -204,6 +204,56 @@ std::ostream &operator<<(std::ostream &stream, const PlatformParameters &pp)
         stream << "_AllocateNonZeroMemory";
     }
 
+    if (pp.eglParameters.emulateCopyTexImage2DFromRenderbuffers == EGL_TRUE)
+    {
+        stream << "_EmulateCopyTexImage2DFromRenderbuffers";
+    }
+
+    if (pp.eglParameters.shaderStencilOutputFeature == EGL_FALSE)
+    {
+        stream << "_NoStencilOutput";
+    }
+
+    if (pp.eglParameters.genMultipleMipsPerPassFeature == EGL_FALSE)
+    {
+        stream << "_NoGenMultipleMipsPerPass";
+    }
+
+    switch (pp.eglParameters.emulatedPrerotation)
+    {
+        case 90:
+            stream << "_PreRotate90";
+            break;
+        case 180:
+            stream << "_PreRotate180";
+            break;
+        case 270:
+            stream << "_PreRotate270";
+            break;
+        default:
+            break;
+    }
+
+    if (pp.eglParameters.asyncCommandQueueFeatureVulkan == EGL_TRUE)
+    {
+        stream << "_AsyncQueue";
+    }
+
+    if (pp.eglParameters.hasExplicitMemBarrierFeatureMtl == EGL_FALSE)
+    {
+        stream << "_NoMetalExplicitMemoryBarrier";
+    }
+
+    if (pp.eglParameters.hasCheapRenderPassFeatureMtl == EGL_FALSE)
+    {
+        stream << "_NoMetalCheapRenderPass";
+    }
+
+    if (pp.eglParameters.forceBufferGPUStorageFeatureMtl == EGL_TRUE)
+    {
+        stream << "_ForceMetalBufferGPUStorage";
+    }
+
     return stream;
 }
 
@@ -745,6 +795,21 @@ PlatformParameters ES31_VULKAN_SWIFTSHADER()
     return PlatformParameters(3, 1, egl_platform::VULKAN_SWIFTSHADER());
 }
 
+PlatformParameters ES32_VULKAN()
+{
+    return PlatformParameters(3, 2, egl_platform::VULKAN());
+}
+
+PlatformParameters ES32_VULKAN_NULL()
+{
+    return PlatformParameters(3, 2, egl_platform::VULKAN_NULL());
+}
+
+PlatformParameters ES32_VULKAN_SWIFTSHADER()
+{
+    return PlatformParameters(3, 2, egl_platform::VULKAN_SWIFTSHADER());
+}
+
 PlatformParameters ES1_METAL()
 {
     return PlatformParameters(1, 0, egl_platform::METAL());
@@ -779,18 +844,4 @@ PlatformParameters ES3_EGL()
 {
     return PlatformParameters(3, 0, GLESDriverType::SystemEGL);
 }
-
-const char *GetNativeEGLLibraryNameWithExtension()
-{
-#if defined(ANGLE_PLATFORM_ANDROID)
-    return "libEGL.so";
-#elif defined(ANGLE_PLATFORM_LINUX)
-    return "libEGL.so.1";
-#elif defined(ANGLE_PLATFORM_WINDOWS)
-    return "libEGL.dll";
-#else
-    return "unknown_libegl";
-#endif
-}
-
 }  // namespace angle

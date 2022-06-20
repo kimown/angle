@@ -11,6 +11,7 @@ As an ANGLE Sheriff. Your job is to:
  1. Keep the [ANGLE Standalone Testers](README.md) in good working order.
  1. Keep the [SwANGLE Try Waterfall](https://luci-milo.appspot.com/p/chromium/g/tryserver.chromium.swangle/builders) in good
     working order.
+ 1. Monitor and respond to ANGLE's [Perf alerts](https://groups.google.com/u/0/a/chromium.org/g/angle-perf-alerts)
 
 If you're not an ANGLE team member, you can contact us on the public ANGLE project
 [Google group](https://groups.google.com/forum/#!forum/angleproject).
@@ -91,6 +92,7 @@ We also use additional auto-rollers to roll third party libraries into ANGLE onc
  * [Vulkan-Loader into ANGLE](https://autoroll.skia.org/r/vulkan-loader-angle-autoroll)
  * [Vulkan-Headers into ANGLE](https://autoroll.skia.org/r/vulkan-headers-angle-autoroll)
  * [Vulkan-ValidationLayers into ANGLE](https://autoroll.skia.org/r/vulkan-validation-layers-angle-autoroll)
+ * [VK-GL-CTS into ANGLE](https://autoroll.skia.org/r/vk-gl-cts-angle-autoroll?tab=status)
 
 Please ensure these rollers are also healthy and unblocked. You can trigger manual rolls using the
 dashboards to land high-priority changes.
@@ -140,3 +142,9 @@ The possible ways to handle these failures are:
 A lower priority task here is to keep healthy all the SwANGLE
 [CI](https://luci-milo.appspot.com/p/chromium/g/chromium.swangle/builders) and
 [Try](https://luci-milo.appspot.com/p/chromium/g/tryserver.chromium.swangle/builders) bots.
+
+## Task 6: Monitor and respond to ANGLE's perf alerts
+
+Any large regressions should be triaged with a new ANGLE bug linked to any suspected CLs that may
+have caused performance to regress. If it's a known/expected regression, the bug can be closed as
+such. The tests are very flaky right now, so a WontFix resolution is often appropriate.

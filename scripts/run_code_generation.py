@@ -82,9 +82,9 @@ generators = {
     'D3D11 format':
         'src/libANGLE/renderer/d3d/d3d11/gen_texture_format_table.py',
     'DXGI format':
-        'src/libANGLE/renderer/d3d/d3d11/gen_dxgi_format_table.py',
+        'src/libANGLE/renderer/gen_dxgi_format_table.py',
     'DXGI format support':
-        'src/libANGLE/renderer/d3d/d3d11/gen_dxgi_support_tables.py',
+        'src/libANGLE/renderer/gen_dxgi_support_tables.py',
     'Emulated HLSL functions':
         'src/compiler/translator/gen_emulated_builtin_function_tables.py',
     'GL copy conversion table':
@@ -114,7 +114,7 @@ generators = {
     'proc table':
         'scripts/gen_proc_table.py',
     'restricted traces':
-        'src/tests/perf_tests/restricted_traces/gen_restricted_traces.py',
+        'src/tests/restricted_traces/gen_restricted_traces.py',
     'Static builtins':
         'src/compiler/translator/gen_builtin_symbols.py',
     'uniform type':
@@ -182,7 +182,10 @@ def load_hashes():
     for file in os.listdir(hash_dir):
         hash_fname = os.path.join(hash_dir, file)
         with open(hash_fname) as hash_file:
-            hashes[file] = json.load(open(hash_fname))
+            try:
+                hashes[file] = json.load(hash_file)
+            except ValueError:
+                raise Exception("Could not decode JSON from %s" % file)
     return hashes
 
 

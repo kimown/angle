@@ -130,7 +130,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     key.output = output;
 
     using UniqueTCompiler = std::unique_ptr<TCompiler, TCompilerDeleter>;
-    static angle::base::NoDestructor<std::unordered_map<TranslatorCacheKey, UniqueTCompiler>>
+    static angle::base::NoDestructor<angle::HashMap<TranslatorCacheKey, UniqueTCompiler>>
         translators;
 
     if (translators->find(key) == translators->end())
@@ -165,6 +165,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         resources.MaxDualSourceDrawBuffers        = 1;
         resources.EXT_gpu_shader5                 = 1;
         resources.MaxClipDistances                = 1;
+        resources.EXT_shadow_samplers             = 1;
 
         if (!translator->Init(resources))
         {

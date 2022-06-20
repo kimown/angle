@@ -2,34 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file contains a list of defective dEQP conformance tests. The expected
-// format is:
-//  {BUG#} {MODIFIERS} : {TEST_NAME} = {PASS,FAIL,FLAKY,TIMEOUT,SKIP}
-//
-// MODIFIERS can be a combination of the below list, combined with a logical AND:
-//  WIN XP VISTA WIN7 WIN8 WIN10
-//  MAC LEOPARD SNOWLEOPARD LION MOUNTAINLION MAVERICKS YOSEMITE ELCAPITAN SIERRA HIGHSIERRA MOJAVE
-//  LINUX CHROMEOS ANDROID
-//  NVIDIA AMD INTEL
-//  DEBUG RELEASE
-//  D3D9 D3D11 OPENGL GLES VULKAN
-//  NEXUS5X PIXEL2ORXL
-//  QUADROP400
-//  SWIFTSHADER
-//
-//
-// TEST_NAME can be a specific test name, or have a '*' in the end, which
-// indicates a prefix matching.
-//
-// Examples:
-// fails on both windows and mac (crash)
-//  91530 WIN : context_lost_restored = SKIP
-//  91530 MAC : context_lost_restored = SKIP
-// fails on windows using NVIDIA GPUs
-//  91533 WIN NVIDIA : gl_min_uniforms = FAIL
-// fails on Nexus5X with GLES backend (hangs)
-//  91531 NEXUS5X GLES : conformance_more_* = SKIP
-
+// See README.md for format.
 
 ////
 //// Desktop expectations
@@ -136,6 +109,12 @@
 1442 OPENGL : dEQP-GLES31.functional.program_interface_query.uniform.referenced_by_shader.* = FAIL
 1442 OPENGL : dEQP-GLES31.functional.program_interface_query.uniform.random.* = FAIL
 1442 OPENGL : dEQP-GLES31.functional.program_interface_query.uniform_block.referenced_by.* = FAIL
+4933 OPENGL : dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_fragment_texture.mapbuffer_* = FAIL
+5353 NVIDIA OPENGL : dEQP-GLES31.functional.image_load_store.*.atomic.exchange_r32f* = FAIL
+
+// Slow / timeout on Linux GL
+5197 LINUX OPENGL : dEQP-GLES31.functional.compute.indirect_dispatch.gen_in_compute.large_offset = TIMEOUT
+5197 LINUX OPENGL : dEQP-GLES31.functional.compute.indirect_dispatch.gen_in_compute.large_offset_multiple_invocations = TIMEOUT
 
 // OpenGL/D3D11 Failing Tests
 1442 OPENGL : dEQP-GLES31.functional.shaders.opaque_type_indexing.* = FAIL
@@ -190,28 +169,37 @@
 // Not failing in last official run, but failed recently:
 4110 SWIFTSHADER : dEQP-GLES31.functional.shaders.helper_invocation.* = FAIL
 
-// Vulkan doesn't support array of array of opaque uniforms. Emulation is not yet done for images
-3881 VULKAN : dEQP-GLES31.functional.program_interface_query.uniform.location.default_block.array.array.image_2d = SKIP
-3881 VULKAN : dEQP-GLES31.functional.program_interface_query.uniform.location.default_block.array.array.iimage_2d_array = SKIP
-
-// Flaky crashes in Windows x86 Subzero Reactor
-4482 WIN SWIFTSHADER : dEQP-GLES31.functional.synchronization.inter_invocation.* = SKIP
+// Vulkan Android doesn't support array of array of opaque uniforms. Emulation is not yet done for images
+3881 VULKAN ANDROID : dEQP-GLES31.functional.program_interface_query.uniform.location.default_block.array.array.image_2d = SKIP
+3881 VULKAN ANDROID : dEQP-GLES31.functional.program_interface_query.uniform.location.default_block.array.array.iimage_2d_array = SKIP
 
 ////
 //// General Vulkan expectations
 ////
 
-// Block name matching failure:
-3459 VULKAN : dEQP-GLES31.functional.shaders.linkage.es31.shader_storage_block.mismatch_with_and_without_instance_name = FAIL
-
 // Tessellation geometry interaction:
 3572 VULKAN : dEQP-GLES31.functional.tessellation_geometry_interaction.* = FAIL
 
-// Vulkan creates the image view with the same format as the texture.
-3885 VULKAN : dEQP-GLES31.functional.image_load_store.*.format_reinterpret.* = FAIL
-
 // Cannot create 2D (array) view of 3D texture.
 3886 VULKAN : dEQP-GLES31.functional.image_load_store.3d.*layer = FAIL
+
+// Geometry shader support:
+5430 VULKAN : dEQP-GLES31.functional.geometry_shading.query.primitives_generated_* = FAIL
+5452 VULKAN : dEQP-GLES31.functional.geometry_shading.layered.layer_provoking_vertex_* = FAIL
+3571 VULKAN : dEQP-GLES31.functional.geometry_shading.*transform_feedback* = SKIP
+3571 VULKAN : dEQP-GLES31.functional.program_interface_query.transform_feedback_varying.*geo* = SKIP
+
+////
+//// AMD Vulkan expectations
+////
+
+// Cannot support the per-sample shading when gl_SampleID or gl_SamplePosition:
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit*_per_sample.multisample_*_1 = FAIL
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit*_per_sample.multisample_*_2 = FAIL
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit*_per_sample.multisample_*_4 = FAIL
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit*_per_sample.multisample_*_8 = FAIL
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit_count_per_two_samples.multisample_*_4 = FAIL
+3588 VULKAN AMD : dEQP-GLES31.functional.shaders.sample_variables.sample_mask_in.bit_count_per_two_samples.multisample_*_8 = FAIL
 
 ////
 //// Android (i.e. Pixel*) Vulkan expectations
@@ -234,9 +222,11 @@
 
 // Passing on recent drivers:
 3726 VULKAN ANDROID : dEQP-GLES31.functional.ssbo.layout.* = FAIL
-3726 VULKAN ANDROID : dEQP-GLES31.functional.atomic_counter.* = FAIL
 3726 VULKAN ANDROID : dEQP-GLES31.functional.synchronization.inter_call.without_memory_barrier.*atomic_counter* = FAIL
 3726 VULKAN ANDROID : dEQP-GLES31.functional.compute.basic.atomic_counter* = FAIL
+
+// Seem to trigger LowMemoryKiller when run in a certain sequence
+5185 VULKAN ANDROID : dEQP-GLES31.functional.atomic_counter.* = SKIP
 
 // Arrays of opaque types as function parameters (possibly related to issue 3882)
 2703 VULKAN ANDROID : dEQP-GLES31.functional.shaders.opaque_type_indexing.atomic_counter.const_literal_vertex = FAIL
@@ -273,3 +263,83 @@
 4371 VULKAN ANDROID : dEQP-GLES31.functional.shaders.implicit_conversions.es31.arithmetic.input_before_literal.add.int_to_vec3_vertex = FAIL
 4371 VULKAN ANDROID : dEQP-GLES31.functional.shaders.implicit_conversions.es31.arithmetic.input_before_literal.add.int_to_uvec3_vertex = FAIL
 4371 SWIFTSHADER : dEQP-GLES31.functional.shaders.implicit_conversions.* = FAIL
+
+// Unexpected crashes on Android 64-bit, some also fail on Android 32-bit
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.1 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.3 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.5 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.9 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.10 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.12 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.13 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.14 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.15 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.17 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_implementation_draw_buffers.18 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_required_draw_buffers.0 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_required_draw_buffers.2 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_required_draw_buffers.10 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_required_draw_buffers.11 = SKIP
+4822 VULKAN ANDROID : dEQP-GLES31.functional.draw_buffers_indexed.random.max_required_draw_buffers.17 = SKIP
+
+// Swiftshader fails to create a correct source/destination srgb8_alpha8_astc image before copy, however 5x4 is correct
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*rgba*srgb8_alpha8_astc_*_khr.*_to_texture2d* = FAIL
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*rgba*srgb8_alpha8_astc_*_khr.*_to_cubemap* = FAIL
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_*_khr_rgba*.*cubemap_to* = FAIL
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_*_khr_rgba*.*texture2d*_to* = FAIL
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_5x4_khr.*texture2d*_to_texture2d* = PASS
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_5x4_khr.*texture2d*_to_cubemap = PASS
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_5x4_khr.*cubemap*_to_texture2d* = PASS
+5275 SWIFTSHADER : dEQP-GLES31.functional.copy_image.*srgb8_alpha8_astc_5x4_khr.*cubemap_to_cubemap = PASS
+
+// Desktop cards without native etc support, angle emulated format fails
+5276 AMD VULKAN : dEQP-GLES31.functional.copy_image.compressed.viewclass_eac* = FAIL
+5276 AMD VULKAN : dEQP-GLES31.functional.copy_image.compressed.viewclass_etc* = FAIL
+5276 AMD VULKAN : dEQP-GLES31.functional.copy_image.mixed.*eac* = FAIL
+5276 NVIDIA VULKAN : dEQP-GLES31.functional.copy_image.compressed.viewclass_eac* = FAIL
+5276 NVIDIA VULKAN : dEQP-GLES31.functional.copy_image.compressed.viewclass_etc* = FAIL
+5276 NVIDIA VULKAN : dEQP-GLES31.functional.copy_image.mixed.*eac* = FAIL
+
+// imageAtomicExchange failure with r32f format
+5353 NVIDIA VULKAN : dEQP-GLES31.functional.image_load_store.*.atomic.exchange_r32f* = FAIL
+
+// Vulkan Android failures with these formats
+5277 VULKAN ANDROID : dEQP-GLES31.functional.copy_image.non_compressed.viewclass_32_bits.rgba8_snorm_rgb10_a2* = FAIL
+5277 VULKAN ANDROID : dEQP-GLES31.functional.copy_image.non_compressed.viewclass_32_bits.rgba8_snorm_rgb9_e5* = FAIL
+
+// Failures with some formats when copying to a renderbuffer
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg8_snorm_r16i.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg8_snorm_r16ui.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb8_snorm_rgb8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb8i_rgb8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb8ui_rgb8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*srgb8_rgb8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*r32i_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*r32i_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*r32ui_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*r32ui_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg16i_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg16i_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg16ui_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rg16ui_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb10_a2_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb10_a2_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb10_a2ui_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgb10_a2ui_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_r32i.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_r32ui.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_rg16i.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_rg16ui.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_snorm_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8i_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8i_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8ui_rgba8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*rgba8ui_srgb8_alpha8.*to_renderbuffer = FAIL
+5370 VULKAN PIXEL2ORXL : dEQP-GLES31.functional.copy_image.non_compressed.*srgb8_alpha8_rgba8.*to_renderbuffer = FAIL
+
+// Cannot support a seperate set of fragment shader input when per-sample shading:
+3588 VULKAN ANDROID : dEQP-GLES31.functional.shaders.sample_variables.sample_pos.correctness.multisample_*_1 = FAIL
+3588 VULKAN ANDROID : dEQP-GLES31.functional.shaders.sample_variables.sample_pos.correctness.multisample_*_2 = FAIL
+3588 VULKAN ANDROID : dEQP-GLES31.functional.shaders.sample_variables.sample_pos.correctness.multisample_*_4 = FAIL

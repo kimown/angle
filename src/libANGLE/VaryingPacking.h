@@ -66,7 +66,9 @@ struct PackedVarying : angle::NonCopyable
     PackedVarying(VaryingInShaderRef &&frontVaryingIn,
                   VaryingInShaderRef &&backVaryingIn,
                   sh::InterpolationType interpolationIn,
-                  GLuint fieldIndexIn);
+                  GLuint arrayIndexIn,
+                  GLuint fieldIndexIn,
+                  GLuint secondaryFieldIndexIn);
     PackedVarying(PackedVarying &&other);
     ~PackedVarying();
 
@@ -78,13 +80,22 @@ struct PackedVarying : angle::NonCopyable
                                     : !backVarying.parentStructName.empty();
     }
 
-    bool isArrayElement() const { return arrayIndex != GL_INVALID_INDEX; }
+    bool isTransformFeedbackArrayElement() const
+    {
+        return isTransformFeedback && arrayIndex != GL_INVALID_INDEX;
+    }
 
     // Return either front or back varying, whichever is available.  Only used when the name of the
     // varying is not important, but only the type is interesting.
     const sh::ShaderVariable &varying() const
     {
         return frontVarying.varying ? *frontVarying.varying : *backVarying.varying;
+    }
+
+    const std::string &getParentStructName() const
+    {
+        ASSERT(isStructField());
+        return frontVarying.varying ? frontVarying.parentStructName : backVarying.parentStructName;
     }
 
     std::string fullName(ShaderType stage) const
@@ -119,11 +130,15 @@ struct PackedVarying : angle::NonCopyable
     // Cached so we can store sh::ShaderVariable to point to varying fields.
     sh::InterpolationType interpolation;
 
+    // Used by varyings that are captured with transform feedback, xor arrays of shader I/O blocks,
+    // distinguished by isTransformFeedback;
     GLuint arrayIndex;
+    bool isTransformFeedback;
 
     // Field index in the struct.  In Vulkan, this is used to assign a
     // struct-typed varying location to the location of its first field.
     GLuint fieldIndex;
+    GLuint secondaryFieldIndex;
 };
 
 struct PackedVaryingRegister final
@@ -221,6 +236,11 @@ class VaryingPacking final : angle::NonCopyable
         return mInactiveVaryingMappedNames;
     }
 
+    const ShaderMap<std::vector<std::string>> &getActiveOutputBuiltIns() const
+    {
+        return mActiveOutputBuiltIns;
+    }
+
     void reset();
 
   private:
@@ -236,7 +256,9 @@ class VaryingPacking final : angle::NonCopyable
     using VaryingUniqueFullNames = ShaderMap<std::set<std::string>>;
     void packUserVarying(const ProgramVaryingRef &ref, VaryingUniqueFullNames *uniqueFullNames);
     void packUserVaryingField(const ProgramVaryingRef &ref,
+                              GLuint arrayIndex,
                               GLuint fieldIndex,
+                              GLuint secondaryFieldIndex,
                               VaryingUniqueFullNames *uniqueFullNames);
     void packUserVaryingTF(const ProgramVaryingRef &ref, size_t subscript);
     void packUserVaryingFieldTF(const ProgramVaryingRef &ref,
@@ -249,6 +271,7 @@ class VaryingPacking final : angle::NonCopyable
     std::vector<PackedVaryingRegister> mRegisterList;
     std::vector<PackedVarying> mPackedVaryings;
     ShaderMap<std::vector<std::string>> mInactiveVaryingMappedNames;
+    ShaderMap<std::vector<std::string>> mActiveOutputBuiltIns;
 
     PackMode mPackMode;
 };

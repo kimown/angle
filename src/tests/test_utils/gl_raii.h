@@ -26,7 +26,13 @@ class GLWrapper : angle::NonCopyable
 {
   public:
     GLWrapper(GLGen *genFunc, GLDelete *deleteFunc) : mGenFunc(genFunc), mDeleteFunc(deleteFunc) {}
-    ~GLWrapper() { (*mDeleteFunc)(1, &mHandle); }
+    ~GLWrapper()
+    {
+        if (mHandle)
+        {
+            (*mDeleteFunc)(1, &mHandle);
+        }
+    }
 
     // The move-constructor and move-assignment operators are necessary so that the data within a
     // GLWrapper object can be relocated.
@@ -127,6 +133,7 @@ class GLQueryEXT : public GLWrapper
   public:
     GLQueryEXT() : GLWrapper(&glGenQueriesEXT, &glDeleteQueriesEXT) {}
 };
+using GLQuery = GLQueryEXT;
 
 class GLShader : angle::NonCopyable
 {
@@ -150,7 +157,13 @@ class GLProgram
   public:
     GLProgram() : mHandle(0) {}
 
-    ~GLProgram() { glDeleteProgram(mHandle); }
+    ~GLProgram()
+    {
+        if (mHandle)
+        {
+            glDeleteProgram(mHandle);
+        }
+    }
 
     void makeEmpty() { mHandle = glCreateProgram(); }
 

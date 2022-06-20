@@ -30,6 +30,25 @@ namespace gl
 class Buffer;
 class Texture;
 
+enum class Command
+{
+    Blit,
+    Clear,
+    CopyImage,
+    Dispatch,
+    Draw,
+    GenerateMipmap,
+    ReadPixels,
+    TexImage,
+    Other
+};
+
+enum class InitState
+{
+    MayNeedInit,
+    Initialized,
+};
+
 struct Rectangle
 {
     Rectangle() : x(0), y(0), width(0), height(0) {}
@@ -53,6 +72,8 @@ struct Rectangle
 
     bool encloses(const gl::Rectangle &inside) const;
 
+    bool empty() const { return width == 0 && height == 0; }
+
     int x;
     int y;
     int width;
@@ -62,7 +83,27 @@ struct Rectangle
 bool operator==(const Rectangle &a, const Rectangle &b);
 bool operator!=(const Rectangle &a, const Rectangle &b);
 
+// Calculate the intersection of two rectangles.  Returns false if the intersection is empty.
 bool ClipRectangle(const Rectangle &source, const Rectangle &clip, Rectangle *intersection);
+// Calculate the smallest rectangle that covers both rectangles.  This rectangle may cover areas
+// not covered by the two rectangles, for example in this situation:
+//
+//   +--+        +----+
+//   | ++-+  ->  |    |
+//   +-++ |      |    |
+//     +--+      +----+
+//
+void GetEnclosingRectangle(const Rectangle &rect1, const Rectangle &rect2, Rectangle *rectUnion);
+// Extend the source rectangle to cover parts (or all of) the second rectangle, in such a way that
+// no area is covered that isn't covered by both rectangles.  For example:
+//
+//             +--+        +--+
+//  source --> |  |        |  |
+//            ++--+-+  ->  |  |
+//            |+--+ |      |  |
+//            +-----+      +--+
+//
+void ExtendRectangle(const Rectangle &source, const Rectangle &extend, Rectangle *extended);
 
 struct Offset
 {
@@ -103,7 +144,8 @@ struct Box
     Box(int x_in, int y_in, int z_in, int width_in, int height_in, int depth_in)
         : x(x_in), y(y_in), z(z_in), width(width_in), height(height_in), depth(depth_in)
     {}
-    Box(const Offset &offset, const Extents &size)
+    template <typename O, typename E>
+    Box(const O &offset, const E &size)
         : x(offset.x),
           y(offset.y),
           z(offset.z),
@@ -114,6 +156,9 @@ struct Box
     bool operator==(const Box &other) const;
     bool operator!=(const Box &other) const;
     Rectangle toRect() const;
+
+    // Whether the Box has offset 0 and the same extents as argument.
+    bool coversSameExtent(const Extents &size) const;
 
     int x;
     int y;
@@ -137,6 +182,7 @@ struct RasterizerState final
     GLfloat polygonOffsetFactor;
     GLfloat polygonOffsetUnits;
 
+    // pointDrawMode/multiSample are only used in the D3D back-end right now.
     bool pointDrawMode;
     bool multiSample;
 
@@ -176,6 +222,11 @@ struct DepthStencilState final
     // This will zero-initialize the struct, including padding.
     DepthStencilState();
     DepthStencilState(const DepthStencilState &other);
+
+    bool isDepthMaskedOut() const;
+    bool isStencilMaskedOut() const;
+    bool isStencilNoOp() const;
+    bool isStencilBackNoOp() const;
 
     bool depthTest;
     GLenum depthFunc;
@@ -230,53 +281,55 @@ class SamplerState final
     SamplerState();
     SamplerState(const SamplerState &other);
 
+    SamplerState &operator=(const SamplerState &other);
+
     static SamplerState CreateDefaultForTarget(TextureType type);
 
     GLenum getMinFilter() const { return mMinFilter; }
 
-    void setMinFilter(GLenum minFilter);
+    bool setMinFilter(GLenum minFilter);
 
     GLenum getMagFilter() const { return mMagFilter; }
 
-    void setMagFilter(GLenum magFilter);
+    bool setMagFilter(GLenum magFilter);
 
     GLenum getWrapS() const { return mWrapS; }
 
-    void setWrapS(GLenum wrapS);
+    bool setWrapS(GLenum wrapS);
 
     GLenum getWrapT() const { return mWrapT; }
 
-    void setWrapT(GLenum wrapT);
+    bool setWrapT(GLenum wrapT);
 
     GLenum getWrapR() const { return mWrapR; }
 
-    void setWrapR(GLenum wrapR);
+    bool setWrapR(GLenum wrapR);
 
     float getMaxAnisotropy() const { return mMaxAnisotropy; }
 
-    void setMaxAnisotropy(float maxAnisotropy);
+    bool setMaxAnisotropy(float maxAnisotropy);
 
     GLfloat getMinLod() const { return mMinLod; }
 
-    void setMinLod(GLfloat minLod);
+    bool setMinLod(GLfloat minLod);
 
     GLfloat getMaxLod() const { return mMaxLod; }
 
-    void setMaxLod(GLfloat maxLod);
+    bool setMaxLod(GLfloat maxLod);
 
     GLenum getCompareMode() const { return mCompareMode; }
 
-    void setCompareMode(GLenum compareMode);
+    bool setCompareMode(GLenum compareMode);
 
     GLenum getCompareFunc() const { return mCompareFunc; }
 
-    void setCompareFunc(GLenum compareFunc);
+    bool setCompareFunc(GLenum compareFunc);
 
     GLenum getSRGBDecode() const { return mSRGBDecode; }
 
-    void setSRGBDecode(GLenum sRGBDecode);
+    bool setSRGBDecode(GLenum sRGBDecode);
 
-    void setBorderColor(const ColorGeneric &color);
+    bool setBorderColor(const ColorGeneric &color);
 
     const ColorGeneric &getBorderColor() const { return mBorderColor; }
 
@@ -382,7 +435,7 @@ using AttributesMask = angle::BitSet<MAX_VERTEX_ATTRIBS>;
 using UniformBlockBindingMask = angle::BitSet<IMPLEMENTATION_MAX_COMBINED_SHADER_UNIFORM_BUFFERS>;
 
 // Used in Framebuffer / Program
-using DrawBufferMask = angle::BitSet<IMPLEMENTATION_MAX_DRAW_BUFFERS>;
+using DrawBufferMask = angle::BitSet8<IMPLEMENTATION_MAX_DRAW_BUFFERS>;
 
 class BlendStateExt final
 {
@@ -407,6 +460,7 @@ class BlendStateExt final
 
         static constexpr Type GetMask(const size_t drawBuffers)
         {
+            ASSERT(drawBuffers > 0);
             ASSERT(drawBuffers <= IMPLEMENTATION_MAX_DRAW_BUFFERS);
             return static_cast<Type>(0xFFFFFFFFFFFFFFFFull >> (64 - drawBuffers * kBits));
         }
@@ -475,7 +529,7 @@ class BlendStateExt final
             // This calculation could be replaced with a single PEXT instruction from BMI2 set.
             diff = ((((diff & 0xFFFF0000) * 0x249) >> 24) & 0xF0) | (((diff * 0x249) >> 12) & 0xF);
 
-            return DrawBufferMask(diff);
+            return DrawBufferMask(static_cast<uint8_t>(diff));
         }
 
         // Compare two packed sets of eight 8-bit values and return an 8-bit diff mask.
@@ -507,7 +561,7 @@ class BlendStateExt final
             // This operation could be replaced with a single PEXT instruction from BMI2 set.
             diff = 0x0002040810204081 * diff >> 56;
 
-            return DrawBufferMask(static_cast<uint32_t>(diff));
+            return DrawBufferMask(static_cast<uint8_t>(diff));
         }
     };
 
@@ -634,6 +688,8 @@ using StorageBuffersMask = angle::BitSet<IMPLEMENTATION_MAX_SHADER_STORAGE_BUFFE
 template <typename T>
 using TexLevelArray = std::array<T, IMPLEMENTATION_MAX_TEXTURE_LEVELS>;
 
+using TexLevelMask = angle::BitSet<IMPLEMENTATION_MAX_TEXTURE_LEVELS>;
+
 enum class ComponentType
 {
     Float       = 0,
@@ -699,7 +755,45 @@ bool ValidateComponentTypeMasks(unsigned long outputTypes,
                                 unsigned long outputMask,
                                 unsigned long inputMask);
 
-using ContextID = uintptr_t;
+enum class RenderToTextureImageIndex
+{
+    // The default image of the texture, where data is expected to be.
+    Default = 0,
+
+    // Intermediate multisampled images for EXT_multisampled_render_to_texture.
+    // These values must match log2(SampleCount).
+    IntermediateImage2xMultisampled  = 1,
+    IntermediateImage4xMultisampled  = 2,
+    IntermediateImage8xMultisampled  = 3,
+    IntermediateImage16xMultisampled = 4,
+
+    // We currently only support up to 16xMSAA in backends that use this enum.
+    InvalidEnum = 5,
+    EnumCount   = 5,
+};
+
+template <typename T>
+using RenderToTextureImageMap = angle::PackedEnumMap<RenderToTextureImageIndex, T>;
+
+struct ContextID
+{
+    uint32_t value;
+};
+
+inline bool operator==(ContextID lhs, ContextID rhs)
+{
+    return lhs.value == rhs.value;
+}
+
+inline bool operator!=(ContextID lhs, ContextID rhs)
+{
+    return lhs.value != rhs.value;
+}
+
+inline bool operator<(ContextID lhs, ContextID rhs)
+{
+    return lhs.value < rhs.value;
+}
 
 constexpr size_t kCubeFaceCount = 6;
 
@@ -714,6 +808,9 @@ using ShaderVector = angle::FixedVector<T, static_cast<size_t>(ShaderType::EnumC
 
 template <typename T>
 using AttachmentArray = std::array<T, IMPLEMENTATION_MAX_FRAMEBUFFER_ATTACHMENTS>;
+
+template <typename T>
+using AttachmentVector = angle::FixedVector<T, IMPLEMENTATION_MAX_FRAMEBUFFER_ATTACHMENTS>;
 
 using AttachmentsMask = angle::BitSet<IMPLEMENTATION_MAX_FRAMEBUFFER_ATTACHMENTS>;
 
@@ -751,6 +848,9 @@ template <typename T>
 using TransformFeedbackBuffersArray =
     std::array<T, gl::IMPLEMENTATION_MAX_TRANSFORM_FEEDBACK_BUFFERS>;
 
+template <typename T>
+using QueryTypeMap = angle::PackedEnumMap<QueryType, T>;
+
 constexpr size_t kBarrierVectorDefaultSize = 16;
 
 template <typename T>
@@ -770,6 +870,72 @@ using TextureBarrierVector = BarrierVector<TextureAndLayout>;
 // necessary. Returns 0 if no buffer is bound or if integer overflow occurs.
 GLsizeiptr GetBoundBufferAvailableSize(const OffsetBindingPointer<Buffer> &binding);
 
+// A texture level index.
+template <typename T>
+class LevelIndexWrapper
+{
+  public:
+    LevelIndexWrapper() = default;
+    explicit constexpr LevelIndexWrapper(T levelIndex) : mLevelIndex(levelIndex) {}
+    constexpr LevelIndexWrapper(const LevelIndexWrapper &other) = default;
+    constexpr LevelIndexWrapper &operator=(const LevelIndexWrapper &other) = default;
+
+    constexpr T get() const { return mLevelIndex; }
+
+    LevelIndexWrapper &operator++()
+    {
+        ++mLevelIndex;
+        return *this;
+    }
+    constexpr bool operator<(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex < other.mLevelIndex;
+    }
+    constexpr bool operator<=(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex <= other.mLevelIndex;
+    }
+    constexpr bool operator>(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex > other.mLevelIndex;
+    }
+    constexpr bool operator>=(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex >= other.mLevelIndex;
+    }
+    constexpr bool operator==(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex == other.mLevelIndex;
+    }
+    constexpr bool operator!=(const LevelIndexWrapper &other) const
+    {
+        return mLevelIndex != other.mLevelIndex;
+    }
+    constexpr LevelIndexWrapper operator+(T other) const
+    {
+        return LevelIndexWrapper(mLevelIndex + other);
+    }
+    constexpr LevelIndexWrapper operator-(T other) const
+    {
+        return LevelIndexWrapper(mLevelIndex - other);
+    }
+    constexpr T operator-(LevelIndexWrapper other) const { return mLevelIndex - other.mLevelIndex; }
+
+  private:
+    T mLevelIndex;
+};
+
+// A GL texture level index.
+using LevelIndex = LevelIndexWrapper<GLint>;
+
+enum class MultisamplingMode
+{
+    // Regular multisampling
+    Regular = 0,
+    // GL_EXT_multisampled_render_to_texture renderbuffer/texture attachments which perform implicit
+    // resolve of multisampled data.
+    MultisampledRenderToTexture,
+};
 }  // namespace gl
 
 namespace rx

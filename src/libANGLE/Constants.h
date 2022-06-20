@@ -38,10 +38,14 @@ enum
     IMPLEMENTATION_MAX_FRAGMENT_SHADER_UNIFORM_BUFFERS = 16,
     IMPLEMENTATION_MAX_COMPUTE_SHADER_UNIFORM_BUFFERS  = 16,
     // GL_EXT_geometry_shader increases the minimum value of GL_MAX_COMBINED_UNIFORM_BLOCKS to 36.
-    IMPLEMENTATION_MAX_COMBINED_SHADER_UNIFORM_BUFFERS = 36,
+    // GL_EXT_tessellation_shader increases the minimum value of GL_MAX_COMBINED_UNIFORM_BLOCKS
+    // to 60.
+    IMPLEMENTATION_MAX_COMBINED_SHADER_UNIFORM_BUFFERS = 60,
 
     // GL_EXT_geometry_shader increases the minimum value of GL_MAX_UNIFORM_BUFFER_BINDINGS to 48.
-    IMPLEMENTATION_MAX_UNIFORM_BUFFER_BINDINGS = 48,
+    // Vulkan's minimum value for maxDescriptorSetUniformBuffers is 72 so allow exposing up to that
+    // many.
+    IMPLEMENTATION_MAX_UNIFORM_BUFFER_BINDINGS = 72,
 
     // Transform feedback limits set to the minimum required by the spec.
     IMPLEMENTATION_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS = 128,
@@ -76,6 +80,9 @@ enum
 
     // Implementation upper limits of max number of clip distances
     IMPLEMENTATION_MAX_CLIP_DISTANCES = 32,
+
+    // Implementation upper limit for layered framebuffer layer count
+    IMPLEMENTATION_MAX_FRAMEBUFFER_LAYERS = 256,
 };
 
 namespace limits

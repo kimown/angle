@@ -20,7 +20,7 @@
 #include "common/platform.h"
 #include "common/string_utils.h"
 #include "common/system_utils.h"
-#include "platform/Platform.h"
+#include "platform/PlatformMethods.h"
 #include "tests/test_expectations/GPUTestConfig.h"
 #include "tests/test_expectations/GPUTestExpectationsParser.h"
 #include "util/test_utils.h"
@@ -31,12 +31,9 @@ namespace
 {
 bool gGlobalError = false;
 bool gExpectError = false;
+uint32_t gBatchId = 0;
 
 constexpr char kInfoTag[] = "*RESULT";
-
-// Stored as globals to work around a Clang bug. http://crbug.com/951458
-std::vector<std::string> gUnexpectedFailed;
-std::vector<std::string> gUnexpectedPasses;
 
 void HandlePlatformError(PlatformMethods *platform, const char *errorMessage)
 {
@@ -72,21 +69,33 @@ const char *gTestExpectationsSearchPaths[] = {
 
 #define OPENGL_CTS_DIR(PATH) "/external/openglcts/data/mustpass/gles/" PATH
 
-const char *gCaseListFiles[] = {OPENGL_CTS_DIR("aosp_mustpass/master/gles2-master.txt"),
-                                OPENGL_CTS_DIR("aosp_mustpass/master/gles3-master.txt"),
-                                OPENGL_CTS_DIR("aosp_mustpass/master/gles31-master.txt"),
-                                "/android/cts/master/egl-master.txt",
-                                OPENGL_CTS_DIR("khronos_mustpass/master/gles2-khr-master.txt"),
-                                OPENGL_CTS_DIR("khronos_mustpass/master/gles3-khr-master.txt"),
-                                OPENGL_CTS_DIR("khronos_mustpass/master/gles31-khr-master.txt")};
+const char *gCaseListFiles[] = {
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles2-master.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles3-master.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles31-master.txt"),
+    "/android/cts/master/egl-master.txt",
+    OPENGL_CTS_DIR("khronos_mustpass/master/gles2-khr-master.txt"),
+    OPENGL_CTS_DIR("khronos_mustpass/master/gles3-khr-master.txt"),
+    OPENGL_CTS_DIR("khronos_mustpass/master/gles31-khr-master.txt"),
+    OPENGL_CTS_DIR("khronos_mustpass/master/gles32-khr-master.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles3-rotate-landscape.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles3-rotate-reverse-portrait.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles3-rotate-reverse-landscape.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles31-rotate-landscape.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles31-rotate-reverse-portrait.txt"),
+    OPENGL_CTS_DIR("aosp_mustpass/master/gles31-rotate-reverse-landscape.txt"),
+};
 
 #undef OPENGL_CTS_DIR
 
 const char *gTestExpectationsFiles[] = {
-    "deqp_gles2_test_expectations.txt",      "deqp_gles3_test_expectations.txt",
-    "deqp_gles31_test_expectations.txt",     "deqp_egl_test_expectations.txt",
-    "deqp_khr_gles2_test_expectations.txt",  "deqp_khr_gles3_test_expectations.txt",
-    "deqp_khr_gles31_test_expectations.txt",
+    "deqp_gles2_test_expectations.txt",         "deqp_gles3_test_expectations.txt",
+    "deqp_gles31_test_expectations.txt",        "deqp_egl_test_expectations.txt",
+    "deqp_khr_gles2_test_expectations.txt",     "deqp_khr_gles3_test_expectations.txt",
+    "deqp_khr_gles31_test_expectations.txt",    "deqp_khr_gles32_test_expectations.txt",
+    "deqp_gles3_rotate_test_expectations.txt",  "deqp_gles3_rotate_test_expectations.txt",
+    "deqp_gles3_rotate_test_expectations.txt",  "deqp_gles31_rotate_test_expectations.txt",
+    "deqp_gles31_rotate_test_expectations.txt", "deqp_gles31_rotate_test_expectations.txt",
 };
 
 using APIInfo = std::pair<const char *, GPUTestConfig::API>;
@@ -102,13 +111,27 @@ constexpr APIInfo kEGLDisplayAPIs[] = {
     {"angle-vulkan", GPUTestConfig::kAPIVulkan},
 };
 
-constexpr char kdEQPEGLString[]  = "--deqp-egl-display-type=";
-constexpr char kANGLEEGLString[] = "--use-angle=";
-constexpr char kdEQPCaseString[] = "--deqp-case=";
+constexpr char kdEQPEGLString[]    = "--deqp-egl-display-type=";
+constexpr char kANGLEEGLString[]   = "--use-angle=";
+constexpr char kANGLEPreRotation[] = "--emulated-pre-rotation=";
+constexpr char kdEQPCaseString[]   = "--deqp-case=";
+constexpr char kBatchIdString[]    = "--batch-id=";
 
 std::array<char, 500> gCaseStringBuffer;
 
+// For angle_deqp_gles3*_rotateN_tests, default gPreRotation to N.
+#if defined(ANGLE_DEQP_GLES3_ROTATE90_TESTS) || defined(ANGLE_DEQP_GLES31_ROTATE90_TESTS)
+constexpr uint32_t kDefaultPreRotation = 90;
+#elif defined(ANGLE_DEQP_GLES3_ROTATE180_TESTS) || defined(ANGLE_DEQP_GLES31_ROTATE180_TESTS)
+constexpr uint32_t kDefaultPreRotation = 180;
+#elif defined(ANGLE_DEQP_GLES3_ROTATE270_TESTS) || defined(ANGLE_DEQP_GLES31_ROTATE270_TESTS)
+constexpr uint32_t kDefaultPreRotation = 270;
+#else
+constexpr uint32_t kDefaultPreRotation = 0;
+#endif
+
 const APIInfo *gInitAPI = nullptr;
+uint32_t gPreRotation   = kDefaultPreRotation;
 
 constexpr const char *gdEQPEGLConfigNameString = "--deqp-gl-config-name=";
 
@@ -118,12 +141,11 @@ const char *gEGLConfigName = "rgba8888d24s8";
 // Returns the default API for a platform.
 const char *GetDefaultAPIName()
 {
-#if defined(ANGLE_PLATFORM_WINDOWS)
-    return "angle-d3d11";
-#elif defined(ANGLE_PLATFORM_APPLE) || defined(ANGLE_PLATFORM_LINUX)
+#if defined(ANGLE_PLATFORM_ANDROID) || defined(ANGLE_PLATFORM_LINUX) || \
+    defined(ANGLE_PLATFORM_WINDOWS)
+    return "angle-vulkan";
+#elif defined(ANGLE_PLATFORM_APPLE)
     return "angle-gl";
-#elif defined(ANGLE_PLATFORM_ANDROID)
-    return "angle-gles";
 #else
 #    error Unknown platform.
 #endif
@@ -267,7 +289,7 @@ void dEQPCaseList::initialize()
         api = gInitAPI->second;
     }
 
-    GPUTestConfig testConfig = GPUTestConfig(api);
+    GPUTestConfig testConfig = GPUTestConfig(api, gPreRotation);
 
 #if !defined(ANGLE_PLATFORM_ANDROID)
     // Note: These prints mess up parsing of test list when running on Android.
@@ -373,7 +395,8 @@ class dEQPTest : public testing::TestWithParam<size_t>
         // crashed tests we track how many tests we "tried" to run.
         sTestCount++;
 
-        if (caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestSkip)
+        if (caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestSkip ||
+            caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestTimeout)
         {
             sSkippedTestCount++;
             std::cout << "Test skipped.\n";
@@ -398,13 +421,13 @@ class dEQPTest : public testing::TestWithParam<size_t>
 
             if (!testSucceeded)
             {
-                gUnexpectedFailed.push_back(caseInfo.mDEQPName);
+                sUnexpectedFailed.push_back(caseInfo.mDEQPName);
             }
         }
         else if (testSucceeded)
         {
             std::cout << "Test expected to fail but passed!" << std::endl;
-            gUnexpectedPasses.push_back(caseInfo.mDEQPName);
+            sUnexpectedPasses.push_back(caseInfo.mDEQPName);
         }
     }
 
@@ -444,21 +467,21 @@ class dEQPTest : public testing::TestWithParam<size_t>
         std::cout << GetTestStatLine("Exception", std::to_string(sTestExceptionCount));
         std::cout << GetTestStatLine("Crashed", std::to_string(crashedCount));
 
-        if (!gUnexpectedPasses.empty())
+        if (!sUnexpectedPasses.empty())
         {
             std::cout << GetTestStatLine("Unexpected Passed Count",
-                                         std::to_string(gUnexpectedPasses.size()));
-            for (const std::string &testName : gUnexpectedPasses)
+                                         std::to_string(sUnexpectedPasses.size()));
+            for (const std::string &testName : sUnexpectedPasses)
             {
                 std::cout << GetTestStatLine("Unexpected Passed Tests", testName);
             }
         }
 
-        if (!gUnexpectedFailed.empty())
+        if (!sUnexpectedFailed.empty())
         {
             std::cout << GetTestStatLine("Unexpected Failed Count",
-                                         std::to_string(gUnexpectedFailed.size()));
-            for (const std::string &testName : gUnexpectedFailed)
+                                         std::to_string(sUnexpectedFailed.size()));
+            for (const std::string &testName : sUnexpectedFailed)
             {
                 std::cout << GetTestStatLine("Unexpected Failed Tests", testName);
             }
@@ -471,6 +494,9 @@ class dEQPTest : public testing::TestWithParam<size_t>
     static uint32_t sTestExceptionCount;
     static uint32_t sNotSupportedTestCount;
     static uint32_t sSkippedTestCount;
+
+    static std::vector<std::string> sUnexpectedFailed;
+    static std::vector<std::string> sUnexpectedPasses;
 };
 
 template <size_t TestModuleIndex>
@@ -485,6 +511,10 @@ template <size_t TestModuleIndex>
 uint32_t dEQPTest<TestModuleIndex>::sNotSupportedTestCount = 0;
 template <size_t TestModuleIndex>
 uint32_t dEQPTest<TestModuleIndex>::sSkippedTestCount = 0;
+template <size_t TestModuleIndex>
+std::vector<std::string> dEQPTest<TestModuleIndex>::sUnexpectedFailed;
+template <size_t TestModuleIndex>
+std::vector<std::string> dEQPTest<TestModuleIndex>::sUnexpectedPasses;
 
 // static
 template <size_t TestModuleIndex>
@@ -496,8 +526,8 @@ void dEQPTest<TestModuleIndex>::SetUpTestCase()
     sTestExceptionCount    = 0;
     sTestCount             = 0;
     sSkippedTestCount      = 0;
-    gUnexpectedPasses.clear();
-    gUnexpectedFailed.clear();
+    sUnexpectedPasses.clear();
+    sUnexpectedFailed.clear();
 
     std::vector<const char *> argv;
 
@@ -520,9 +550,22 @@ void dEQPTest<TestModuleIndex>::SetUpTestCase()
         argv.push_back("--deqp-visibility=hidden");
     }
 
+    std::string logNameString;
+    if (gBatchId != 0)
+    {
+        std::stringstream logNameStream;
+        logNameStream << "--deqp-log-filename=test-results-batch-" << std::setfill('0')
+                      << std::setw(3) << gBatchId << ".qpa";
+        logNameString = logNameStream.str();
+        argv.push_back(logNameString.c_str());
+
+        // Flushing during multi-process execution punishes HDDs. http://anglebug.com/5157
+        argv.push_back("--deqp-log-flush=disable");
+    }
+
     // Init the platform.
     if (!deqp_libtester_init_platform(static_cast<int>(argv.size()), argv.data(),
-                                      reinterpret_cast<void *>(&HandlePlatformError)))
+                                      reinterpret_cast<void *>(&HandlePlatformError), gPreRotation))
     {
         std::cout << "Aborting test due to dEQP initialization error." << std::endl;
         exit(1);
@@ -575,6 +618,34 @@ ANGLE_INSTANTIATE_DEQP_TEST_CASE(KHR_GLES3, 5);
 ANGLE_INSTANTIATE_DEQP_TEST_CASE(KHR_GLES31, 6);
 #endif
 
+#ifdef ANGLE_DEQP_KHR_GLES32_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(KHR_GLES32, 7);
+#endif
+
+#ifdef ANGLE_DEQP_GLES3_ROTATE90_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES3_ROTATE90, 8);
+#endif
+
+#ifdef ANGLE_DEQP_GLES3_ROTATE180_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES3_ROTATE180, 9);
+#endif
+
+#ifdef ANGLE_DEQP_GLES3_ROTATE270_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES3_ROTATE270, 10);
+#endif
+
+#ifdef ANGLE_DEQP_GLES31_ROTATE90_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES31_ROTATE90, 11);
+#endif
+
+#ifdef ANGLE_DEQP_GLES31_ROTATE180_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES31_ROTATE180, 12);
+#endif
+
+#ifdef ANGLE_DEQP_GLES31_ROTATE270_TESTS
+ANGLE_INSTANTIATE_DEQP_TEST_CASE(GLES31_ROTATE270, 13);
+#endif
+
 void HandleDisplayType(const char *displayTypeString)
 {
     std::stringstream argStream;
@@ -602,6 +673,24 @@ void HandleDisplayType(const char *displayTypeString)
     }
 }
 
+void HandlePreRotation(const char *preRotationString)
+{
+    std::istringstream argStream(preRotationString);
+
+    uint32_t preRotation = 0;
+    argStream >> preRotation;
+
+    if (!argStream ||
+        (preRotation != 0 && preRotation != 90 && preRotation != 180 && preRotation != 270))
+    {
+        std::cout << "Invalid PreRotation '" << preRotationString
+                  << "'; must be either 0, 90, 180 or 270" << std::endl;
+        exit(1);
+    }
+
+    gPreRotation = preRotation;
+}
+
 void HandleEGLConfigName(const char *configNameString)
 {
     gEGLConfigName = configNameString;
@@ -625,13 +714,10 @@ void HandleCaseName(const char *caseString, int *argc, int argIndex, char **argv
     argv[argIndex] = gCaseStringBuffer.data();
 }
 
-void DeleteArg(int *argc, int argIndex, char **argv)
+void HandleBatchId(const char *batchIdString)
 {
-    (*argc)--;
-    for (int moveIndex = argIndex; moveIndex < *argc; ++moveIndex)
-    {
-        argv[moveIndex] = argv[moveIndex + 1];
-    }
+    std::stringstream batchIdStream(batchIdString);
+    batchIdStream >> gBatchId;
 }
 }  // anonymous namespace
 
@@ -644,28 +730,41 @@ void InitTestHarness(int *argc, char **argv)
         if (strncmp(argv[argIndex], kdEQPEGLString, strlen(kdEQPEGLString)) == 0)
         {
             HandleDisplayType(argv[argIndex] + strlen(kdEQPEGLString));
-            DeleteArg(argc, argIndex, argv);
         }
         else if (strncmp(argv[argIndex], kANGLEEGLString, strlen(kANGLEEGLString)) == 0)
         {
             HandleDisplayType(argv[argIndex] + strlen(kANGLEEGLString));
-            DeleteArg(argc, argIndex, argv);
+        }
+        else if (strncmp(argv[argIndex], kANGLEPreRotation, strlen(kANGLEPreRotation)) == 0)
+        {
+            HandlePreRotation(argv[argIndex] + strlen(kANGLEPreRotation));
         }
         else if (strncmp(argv[argIndex], gdEQPEGLConfigNameString,
                          strlen(gdEQPEGLConfigNameString)) == 0)
         {
             HandleEGLConfigName(argv[argIndex] + strlen(gdEQPEGLConfigNameString));
-            DeleteArg(argc, argIndex, argv);
         }
         else if (strncmp(argv[argIndex], kdEQPCaseString, strlen(kdEQPCaseString)) == 0)
         {
             HandleCaseName(argv[argIndex] + strlen(kdEQPCaseString), argc, argIndex, argv);
-            argIndex++;
         }
-        else
+        else if (strncmp(argv[argIndex], kBatchIdString, strlen(kBatchIdString)) == 0)
         {
-            argIndex++;
+            HandleBatchId(argv[argIndex] + strlen(kBatchIdString));
         }
+        argIndex++;
+    }
+
+    GPUTestConfig::API api = GetDefaultAPIInfo()->second;
+    if (gInitAPI)
+    {
+        api = gInitAPI->second;
+    }
+    if (gPreRotation != 0 && api != GPUTestConfig::kAPIVulkan &&
+        api != GPUTestConfig::kAPISwiftShader)
+    {
+        std::cout << "PreRotation is only supported on Vulkan" << std::endl;
+        exit(1);
     }
 }
 }  // namespace angle

@@ -10,9 +10,9 @@
 #ifndef LIBANGLE_RENDERER_VULKAN_SURFACEVK_H_
 #define LIBANGLE_RENDERER_VULKAN_SURFACEVK_H_
 
+#include "common/vulkan/vk_headers.h"
 #include "libANGLE/renderer/SurfaceImpl.h"
 #include "libANGLE/renderer/vulkan/RenderTargetVk.h"
-#include "libANGLE/renderer/vulkan/vk_headers.h"
 #include "libANGLE/renderer/vulkan/vk_helpers.h"
 
 namespace rx
@@ -42,7 +42,7 @@ class SurfaceVk : public SurfaceImpl, public angle::ObserverInterface
 class OffscreenSurfaceVk : public SurfaceVk
 {
   public:
-    OffscreenSurfaceVk(const egl::SurfaceState &surfaceState);
+    OffscreenSurfaceVk(const egl::SurfaceState &surfaceState, RendererVk *renderer);
     ~OffscreenSurfaceVk() override;
 
     egl::Error initialize(const egl::Display *display) override;
@@ -87,14 +87,16 @@ class OffscreenSurfaceVk : public SurfaceVk
                                  EGLint width,
                                  EGLint height,
                                  const vk::Format &vkFormat,
-                                 GLint samples);
+                                 GLint samples,
+                                 bool isRobustResourceInitEnabled);
 
         angle::Result initializeWithExternalMemory(DisplayVk *displayVk,
                                                    EGLint width,
                                                    EGLint height,
                                                    const vk::Format &vkFormat,
                                                    GLint samples,
-                                                   void *buffer);
+                                                   void *buffer,
+                                                   bool isRobustResourceInitEnabled);
 
         void destroy(const egl::Display *display);
 
@@ -115,21 +117,6 @@ class OffscreenSurfaceVk : public SurfaceVk
 // Data structures used in WindowSurfaceVk
 namespace impl
 {
-// The submission fence of the context used to throttle the CPU.
-struct SwapHistory : angle::NonCopyable
-{
-    SwapHistory();
-    SwapHistory(SwapHistory &&other) = delete;
-    SwapHistory &operator=(SwapHistory &&other) = delete;
-    ~SwapHistory();
-
-    void destroy(RendererVk *renderer);
-
-    angle::Result waitFence(ContextVk *contextVk);
-
-    // Fence associated with the last submitted work to render to this swapchain image.
-    vk::Shared<vk::Fence> sharedFence;
-};
 static constexpr size_t kSwapHistorySize = 2;
 
 // Old swapchain and associated present semaphores that need to be scheduled for destruction when
@@ -193,10 +180,17 @@ class WindowSurfaceVk : public SurfaceVk
     void destroy(const egl::Display *display) override;
 
     egl::Error initialize(const egl::Display *display) override;
+    angle::Result getAttachmentRenderTarget(const gl::Context *context,
+                                            GLenum binding,
+                                            const gl::ImageIndex &imageIndex,
+                                            GLsizei samples,
+                                            FramebufferAttachmentRenderTarget **rtOut) override;
     FramebufferImpl *createDefaultFramebuffer(const gl::Context *context,
                                               const gl::FramebufferState &state) override;
     egl::Error swap(const gl::Context *context) override;
-    egl::Error swapWithDamage(const gl::Context *context, EGLint *rects, EGLint n_rects) override;
+    egl::Error swapWithDamage(const gl::Context *context,
+                              const EGLint *rects,
+                              EGLint n_rects) override;
     egl::Error postSubBuffer(const gl::Context *context,
                              EGLint x,
                              EGLint y,
@@ -238,11 +232,18 @@ class WindowSurfaceVk : public SurfaceVk
 
     vk::Semaphore getAcquireImageSemaphore();
 
-    VkSurfaceTransformFlagBitsKHR getPreTransform() { return mPreTransform; }
+    VkSurfaceTransformFlagBitsKHR getPreTransform()
+    {
+        if (mEmulatedPreTransform != VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+        {
+            return mEmulatedPreTransform;
+        }
+        return mPreTransform;
+    }
 
   protected:
     angle::Result swapImpl(const gl::Context *context,
-                           EGLint *rects,
+                           const EGLint *rects,
                            EGLint n_rects,
                            const void *pNextChain);
 
@@ -255,21 +256,31 @@ class WindowSurfaceVk : public SurfaceVk
     virtual angle::Result getCurrentWindowSize(vk::Context *context, gl::Extents *extentsOut) = 0;
 
     angle::Result initializeImpl(DisplayVk *displayVk);
-    angle::Result recreateSwapchain(ContextVk *contextVk,
-                                    const gl::Extents &extents,
-                                    uint32_t swapHistoryIndex);
+    angle::Result recreateSwapchain(ContextVk *contextVk, const gl::Extents &extents);
     angle::Result createSwapChain(vk::Context *context,
                                   const gl::Extents &extents,
                                   VkSwapchainKHR oldSwapchain);
-    angle::Result checkForOutOfDateSwapchain(ContextVk *contextVk,
-                                             uint32_t swapHistoryIndex,
-                                             bool presentOutOfDate);
+    angle::Result queryAndAdjustSurfaceCaps(ContextVk *contextVk,
+                                            VkSurfaceCapabilitiesKHR *surfaceCaps);
+    angle::Result checkForOutOfDateSwapchain(ContextVk *contextVk, bool presentOutOfDate);
     angle::Result resizeSwapchainImages(vk::Context *context, uint32_t imageCount);
     void releaseSwapchainImages(ContextVk *contextVk);
     void destroySwapChainImages(DisplayVk *displayVk);
-    VkResult nextSwapchainImage(vk::Context *context);
+    // This method calls vkAcquireNextImageKHR() to acquire the next swapchain image.  It is called
+    // when the swapchain is initially created and when present() finds the swapchain out of date.
+    // Otherwise, it is scheduled to be called later by deferAcquireNextImage().
+    VkResult acquireNextSwapchainImage(vk::Context *context);
+    // This method is called when a swapchain image is presented.  It schedules
+    // acquireNextSwapchainImage() to be called later.
+    void deferAcquireNextImage(const gl::Context *context);
+    // Called when a swapchain image whose acquisition was deferred must be acquired.  This method
+    // will recreate the swapchain (if needed) and call the acquireNextSwapchainImage() method.
+    angle::Result doDeferredAcquireNextImage(const gl::Context *context, bool presentOutOfDate);
+    angle::Result computePresentOutOfDate(vk::Context *context,
+                                          VkResult result,
+                                          bool *presentOutOfDate);
     angle::Result present(ContextVk *contextVk,
-                          EGLint *rects,
+                          const EGLint *rects,
                           EGLint n_rects,
                           const void *pNextChain,
                           bool *presentOutOfDate);
@@ -290,11 +301,12 @@ class WindowSurfaceVk : public SurfaceVk
     VkPresentModeKHR mDesiredSwapchainPresentMode;  // Desired mode set through setSwapInterval()
     uint32_t mMinImageCount;
     VkSurfaceTransformFlagBitsKHR mPreTransform;
+    VkSurfaceTransformFlagBitsKHR mEmulatedPreTransform;
     VkCompositeAlphaFlagBitsKHR mCompositeAlpha;
 
-    // A circular buffer that stores the submission fence of the context on every swap.  The CPU is
-    // throttled by waiting for the 2nd previous serial to finish.
-    std::array<impl::SwapHistory, impl::kSwapHistorySize> mSwapHistory;
+    // A circular buffer that stores the serial of the submission fence of the context on every
+    // swap. The CPU is throttled by waiting for the 2nd previous serial to finish.
+    std::array<Serial, impl::kSwapHistorySize> mSwapHistory;
     size_t mCurrentSwapHistoryIndex;
 
     // The previous swapchain which needs to be scheduled for destruction when appropriate.  This
@@ -323,6 +335,9 @@ class WindowSurfaceVk : public SurfaceVk
     vk::ImageViewHelper mColorImageMSViews;
     angle::ObserverBinding mColorImageMSBinding;
     vk::Framebuffer mFramebufferMS;
+
+    // True when acquiring the next image is deferred.
+    bool mNeedToAcquireNextSwapchainImage;
 };
 
 }  // namespace rx

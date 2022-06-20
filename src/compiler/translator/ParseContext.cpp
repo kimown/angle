@@ -128,6 +128,26 @@ bool IsBufferOrSharedVariable(TIntermTyped *var)
     return false;
 }
 
+TIntermTyped *FindLValueBase(TIntermTyped *node)
+{
+    do
+    {
+        const TIntermBinary *binary = node->getAsBinaryNode();
+        if (binary == nullptr)
+        {
+            return node;
+        }
+
+        TOperator op = binary->getOp();
+        if (op != EOpIndexDirect && op != EOpIndexIndirect)
+        {
+            return static_cast<TIntermTyped *>(nullptr);
+        }
+
+        node = binary->getLeft();
+    } while (true);
+}
+
 }  // namespace
 
 // This tracks each binding point's current default offset for inheritance of subsequent
@@ -210,6 +230,7 @@ TParseContext::TParseContext(TSymbolTable &symt,
       mMaxCombinedTextureImageUnits(resources.MaxCombinedTextureImageUnits),
       mMaxUniformLocations(resources.MaxUniformLocations),
       mMaxUniformBufferBindings(resources.MaxUniformBufferBindings),
+      mMaxVertexAttribs(resources.MaxVertexAttribs),
       mMaxAtomicCounterBindings(resources.MaxAtomicCounterBindings),
       mMaxShaderStorageBufferBindings(resources.MaxShaderStorageBufferBindings),
       mDeclaringFunction(false),
@@ -219,6 +240,7 @@ TParseContext::TParseContext(TSymbolTable &symt,
       mGeometryShaderMaxVertices(-1),
       mMaxGeometryShaderInvocations(resources.MaxGeometryShaderInvocations),
       mMaxGeometryShaderMaxVertices(resources.MaxGeometryOutputVertices),
+      mGeometryInputArraySize(0),
       mFunctionBodyNewScope(false),
       mOutputType(outputType)
 {}
@@ -533,6 +555,7 @@ bool TParseContext::checkCanBeLValue(const TSourceLoc &line, const char *op, TIn
         case EvqNoPerspectiveIn:
         case EvqSmoothIn:
         case EvqCentroidIn:
+        case EvqSampleIn:
             message = "can't modify an input";
             break;
         case EvqUniform:
@@ -597,6 +620,15 @@ bool TParseContext::checkCanBeLValue(const TSourceLoc &line, const char *op, TIn
             {
                 message = "can't modify gl_Layer in a fragment shader";
             }
+            break;
+        case EvqSampleID:
+            message = "can't modify gl_SampleID";
+            break;
+        case EvqSampleMaskIn:
+            message = "can't modify gl_SampleMaskIn";
+            break;
+        case EvqSamplePosition:
+            message = "can't modify gl_SamplePosition";
             break;
         default:
             //
@@ -1541,6 +1573,18 @@ void TParseContext::nonEmptyDeclarationErrorCheck(const TPublicType &publicType,
         }
     }
 
+    if (mShaderVersion >= 300 && publicType.qualifier == EvqVertexIn)
+    {
+        // Valid vertex input declarations can't be unsized arrays since they can't be initialized.
+        // But invalid shaders may still reach here with an unsized array declaration.
+        TType type(publicType);
+        if (!type.isUnsizedArray())
+        {
+            checkAttributeLocationInRange(identifierLocation, type.getLocationCount(),
+                                          publicType.layoutQualifier);
+        }
+    }
+
     // check for layout qualifier issues
     const TLayoutQualifier layoutQualifier = publicType.layoutQualifier;
 
@@ -1788,9 +1832,30 @@ void TParseContext::checkUniformLocationInRange(const TSourceLoc &location,
                                                 const TLayoutQualifier &layoutQualifier)
 {
     int loc = layoutQualifier.location;
-    if (loc >= 0 && loc + objectLocationCount > mMaxUniformLocations)
+    if (loc >= 0)  // Shader-specified location
     {
-        error(location, "Uniform location out of range", "location");
+        if (loc >= mMaxUniformLocations || objectLocationCount > mMaxUniformLocations ||
+            static_cast<unsigned int>(loc) + static_cast<unsigned int>(objectLocationCount) >
+                static_cast<unsigned int>(mMaxUniformLocations))
+        {
+            error(location, "Uniform location out of range", "location");
+        }
+    }
+}
+
+void TParseContext::checkAttributeLocationInRange(const TSourceLoc &location,
+                                                  int objectLocationCount,
+                                                  const TLayoutQualifier &layoutQualifier)
+{
+    int loc = layoutQualifier.location;
+    if (loc >= 0)  // Shader-specified location
+    {
+        if (loc >= mMaxVertexAttribs || objectLocationCount > mMaxVertexAttribs ||
+            static_cast<unsigned int>(loc) + static_cast<unsigned int>(objectLocationCount) >
+                static_cast<unsigned int>(mMaxVertexAttribs))
+        {
+            error(location, "Attribute location out of range", "location");
+        }
     }
 }
 
@@ -2380,7 +2445,10 @@ void TParseContext::checkInputOutputTypeIsValidES3(const TQualifier qualifier,
     bool typeContainsIntegers =
         (type.getBasicType() == EbtInt || type.getBasicType() == EbtUInt ||
          type.isStructureContainingType(EbtInt) || type.isStructureContainingType(EbtUInt));
-    if (typeContainsIntegers && qualifier != EvqFlatIn && qualifier != EvqFlatOut)
+    bool extendedShaderTypes =
+        mShaderVersion == 320 || isExtensionEnabled(TExtension::EXT_geometry_shader);
+    if (typeContainsIntegers && qualifier != EvqFlatIn && qualifier != EvqFlatOut &&
+        (!extendedShaderTypes || mShaderType == GL_FRAGMENT_SHADER))
     {
         error(qualifierLocation, "must use 'flat' interpolation here",
               getQualifierString(qualifier));
@@ -3007,6 +3075,7 @@ void TParseContext::setGeometryShaderInputArraySize(unsigned int inputArraySize,
               "array inputs.",
               "layout");
     }
+    mGeometryInputArraySize = inputArraySize;
 }
 
 bool TParseContext::parseGeometryShaderInputLayoutQualifier(const TTypeQualifier &typeQualifier)
@@ -3766,8 +3835,6 @@ TIntermTyped *TParseContext::addConstructor(TFunctionLookup *fnCall, const TSour
 
 //
 // Interface/uniform blocks
-// TODO(jiawei.shao@intel.com): implement GL_EXT_shader_io_blocks.
-//
 TIntermDeclaration *TParseContext::addInterfaceBlock(
     const TTypeQualifierBuilder &typeQualifierBuilder,
     const TSourceLoc &nameLine,
@@ -3775,12 +3842,16 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
     TFieldList *fieldList,
     const ImmutableString &instanceName,
     const TSourceLoc &instanceLine,
-    TIntermTyped *arrayIndex,
-    const TSourceLoc &arrayIndexLine)
+    const TVector<unsigned int> *arraySizes,
+    const TSourceLoc &arraySizesLine)
 {
     checkIsNotReserved(nameLine, blockName);
 
     TTypeQualifier typeQualifier = typeQualifierBuilder.getVariableTypeQualifier(mDiagnostics);
+
+    const bool isUniformOrBuffer =
+        typeQualifier.qualifier == EvqUniform || typeQualifier.qualifier == EvqBuffer;
+    const bool isShaderIoBlock = IsShaderIoBlock(typeQualifier.qualifier);
 
     if (mShaderVersion < 310 && typeQualifier.qualifier != EvqUniform)
     {
@@ -3791,8 +3862,22 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
     }
     else if (typeQualifier.qualifier != EvqUniform && typeQualifier.qualifier != EvqBuffer)
     {
-        error(typeQualifier.line, "invalid qualifier: interface blocks must be uniform or buffer",
-              getQualifierString(typeQualifier.qualifier));
+        if (isShaderIoBlock)
+        {
+            if (!isExtensionEnabled(TExtension::OES_shader_io_blocks) &&
+                !isExtensionEnabled(TExtension::EXT_shader_io_blocks))
+            {
+                error(typeQualifier.line,
+                      "invalid qualifier: interface blocks need shader io block extension",
+                      getQualifierString(typeQualifier.qualifier));
+            }
+        }
+        else
+        {
+            error(typeQualifier.line,
+                  "invalid qualifier: interface blocks must be uniform or buffer",
+                  getQualifierString(typeQualifier.qualifier));
+        }
     }
 
     if (typeQualifier.invariant)
@@ -3805,11 +3890,52 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
         checkMemoryQualifierIsNotSpecified(typeQualifier.memoryQualifier, typeQualifier.line);
     }
 
-    // add array index
-    unsigned int arraySize = 0;
-    if (arrayIndex != nullptr)
+    // Verify array sizes
+    if (arraySizes)
     {
-        arraySize = checkIsValidArraySize(arrayIndexLine, arrayIndex);
+        if (isUniformOrBuffer)
+        {
+            if (arraySizes->size() == 0)
+            {
+                error(arraySizesLine, "unsized arrays are not allowed with interface blocks", "");
+            }
+            if (arraySizes->size() > 1)
+            {
+                error(arraySizesLine, "array of arrays are not allowed with interface blocks", "");
+            }
+        }
+        else if (isShaderIoBlock)
+        {
+            size_t arrayDimensions = arraySizes->size();
+
+            // Geometry shader inputs have a level arrayness that must be ignored.
+            if (mShaderType == GL_GEOMETRY_SHADER_EXT && IsVaryingIn(typeQualifier.qualifier))
+            {
+                ASSERT(arrayDimensions > 0);
+                --arrayDimensions;
+
+                // Validate that the array size of input matches the geometry layout
+                // declaration, if not automatic (specified as []).
+                const unsigned int geometryDim = arraySizes->back();
+                if (geometryDim > 0 && geometryDim != mGeometryInputArraySize)
+                {
+                    error(arraySizesLine,
+                          "geometry shader input block array size inconsistent "
+                          "with primitive",
+                          "");
+                }
+            }
+
+            if (arrayDimensions > 1)
+            {
+                error(arraySizesLine, "array of arrays are not allowed with I/O blocks", "");
+            }
+        }
+    }
+    else if (isShaderIoBlock && mShaderType == GL_GEOMETRY_SHADER_EXT &&
+             IsVaryingIn(typeQualifier.qualifier))
+    {
+        error(arraySizesLine, "geometry shader input blocks must be an array", "");
     }
 
     checkIndexIsNotSpecified(typeQualifier.line, typeQualifier.layoutQualifier.index);
@@ -3820,6 +3946,8 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
     }
     else
     {
+        unsigned int arraySize =
+            arraySizes == nullptr || arraySizes->empty() ? 0 : (*arraySizes)[0];
         checkBlockBindingIsValid(typeQualifier.line, typeQualifier.qualifier,
                                  typeQualifier.layoutQualifier.binding, arraySize);
     }
@@ -3829,7 +3957,10 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
                                           typeQualifier.layoutQualifier.earlyFragmentTests);
 
     TLayoutQualifier blockLayoutQualifier = typeQualifier.layoutQualifier;
-    checkLocationIsNotSpecified(typeQualifier.line, blockLayoutQualifier);
+    if (!IsShaderIoBlock(typeQualifier.qualifier))
+    {
+        checkLocationIsNotSpecified(typeQualifier.line, blockLayoutQualifier);
+    }
     checkStd430IsForShaderStorageBlock(typeQualifier.line, blockLayoutQualifier.blockStorage,
                                        typeQualifier.qualifier);
 
@@ -3893,6 +4024,28 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
                           getQualifierString(qualifier));
                 }
                 break;
+            // a member variable in io block may have different interpolation.
+            case EvqFlatIn:
+            case EvqFlatOut:
+            case EvqNoPerspectiveIn:
+            case EvqNoPerspectiveOut:
+            case EvqSmoothIn:
+            case EvqSmoothOut:
+            case EvqCentroidIn:
+            case EvqCentroidOut:
+                break;
+            // a member variable can have an incomplete qualifier because shader io block has either
+            // in or out.
+            case EvqSmooth:
+            case EvqFlat:
+            case EvqNoPerspective:
+            case EvqCentroid:
+                if (!IsShaderIoBlock(typeQualifier.qualifier))
+                {
+                    error(field->line(), "invalid qualifier on interface block member",
+                          getQualifierString(qualifier));
+                }
+                break;
             default:
                 error(field->line(), "invalid qualifier on interface block member",
                       getQualifierString(qualifier));
@@ -3906,7 +4059,6 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
 
         // check layout qualifiers
         TLayoutQualifier fieldLayoutQualifier = fieldType->getLayoutQualifier();
-        checkLocationIsNotSpecified(field->line(), fieldLayoutQualifier);
         checkIndexIsNotSpecified(field->line(), fieldLayoutQualifier.index);
         checkBindingIsNotSpecified(field->line(), fieldLayoutQualifier.binding);
 
@@ -3966,9 +4118,9 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
 
     TType *interfaceBlockType =
         new TType(interfaceBlock, typeQualifier.qualifier, blockLayoutQualifier);
-    if (arrayIndex != nullptr)
+    if (arraySizes)
     {
-        interfaceBlockType->makeArray(arraySize);
+        interfaceBlockType->makeArrays(*arraySizes);
     }
 
     // The instance variable gets created to refer to the interface block type from the AST
@@ -4120,7 +4272,6 @@ TIntermTyped *TParseContext::addIndexExpression(TIntermTyped *baseExpression,
     {
         if (baseExpression->isInterfaceBlock())
         {
-            // TODO(jiawei.shao@intel.com): implement GL_EXT_shader_io_blocks.
             switch (baseExpression->getQualifier())
             {
                 case EvqPerVertexIn:
@@ -4141,8 +4292,12 @@ TIntermTyped *TParseContext::addIndexExpression(TIntermTyped *baseExpression,
                           "[");
                     break;
                 default:
-                    // We can reach here only in error cases.
-                    ASSERT(mDiagnostics->numErrors() > 0);
+                    // It's ok for shader I/O blocks to be dynamically indexed
+                    if (!IsShaderIoBlock(baseExpression->getQualifier()))
+                    {
+                        // We can reach here only in error cases.
+                        ASSERT(mDiagnostics->numErrors() > 0);
+                    }
                     break;
             }
         }
@@ -5949,6 +6104,41 @@ void TParseContext::checkSingleTextureOffset(const TSourceLoc &line,
     }
 }
 
+void TParseContext::checkInterpolationFS(TIntermAggregate *functionCall)
+{
+    const TFunction *func = functionCall->getFunction();
+    if (!BuiltInGroup::isInterpolationFS(func))
+    {
+        return;
+    }
+
+    TIntermTyped *arg0 = nullptr;
+
+    if (functionCall->getAsAggregate())
+    {
+        const TIntermSequence *argp = functionCall->getSequence();
+        if (argp->size() > 0)
+            arg0 = (*argp)[0]->getAsTyped();
+    }
+    else
+    {
+        assert(functionCall->getAsUnaryNode());
+        arg0 = functionCall->getAsUnaryNode()->getOperand();
+    }
+
+    // Make sure the first argument is an interpolant, or an array element of an interpolant
+    if (!IsVaryingIn(arg0->getType().getQualifier()))
+    {
+        // It might still be an array element.
+        const TIntermTyped *base = FindLValueBase(arg0);
+
+        if (base == nullptr || (!IsVaryingIn(base->getType().getQualifier())))
+            error(arg0->getLine(),
+                  "first argument must be an interpolant, or interpolant-array element",
+                  func->name());
+    }
+}
+
 void TParseContext::checkAtomicMemoryBuiltinFunctions(TIntermAggregate *functionCall)
 {
     const TFunction *func = functionCall->getFunction();
@@ -6012,6 +6202,21 @@ void TParseContext::checkImageMemoryAccessForBuiltinFunctions(TIntermAggregate *
             {
                 error(imageNode->getLine(),
                       "'imageLoad' cannot be used with images qualified as 'writeonly'",
+                      GetImageArgumentToken(imageNode));
+            }
+        }
+        else if (BuiltInGroup::isImageAtomic(func))
+        {
+            if (memoryQualifier.readonly)
+            {
+                error(imageNode->getLine(),
+                      "'imageAtomic' cannot be used with images qualified as 'readonly'",
+                      GetImageArgumentToken(imageNode));
+            }
+            if (memoryQualifier.writeonly)
+            {
+                error(imageNode->getLine(),
+                      "'imageAtomic' cannot be used with images qualified as 'writeonly'",
                       GetImageArgumentToken(imageNode));
             }
         }
@@ -6214,6 +6419,7 @@ TIntermTyped *TParseContext::addNonConstructorFunctionCall(TFunctionLookup *fnCa
             callNode->setLine(loc);
             checkTextureOffset(callNode);
             checkTextureGather(callNode);
+            checkInterpolationFS(callNode);
             checkImageMemoryAccessForBuiltinFunctions(callNode);
             functionCallRValueLValueErrorCheck(fnCandidate, callNode);
             return callNode;
@@ -6224,7 +6430,7 @@ TIntermTyped *TParseContext::addNonConstructorFunctionCall(TFunctionLookup *fnCa
         }
     }
 
-    // Error message was already written. Put on a dummy node for error recovery.
+    // Error message was already written. Put on an unused node for error recovery.
     return CreateZeroNode(TType(EbtFloat, EbpMedium, EvqConst));
 }
 

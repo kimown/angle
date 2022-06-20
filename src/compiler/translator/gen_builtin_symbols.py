@@ -637,11 +637,21 @@ class GroupedList:
             if ('essl_ext_symbol' in self.objs[name_hash] and
                     self.objs[name_hash]['essl_ext_symbol'] != symbol):
                 # Adding a variable that is part of two ESSL extensions
-                if essl_extension != 'UNDEFINED':
+                if 'essl_ext_symbol2' not in self.objs[name_hash]:
                     self.objs[name_hash]['essl_extension2'] = essl_extension
                     self.objs[name_hash]['essl_ext_level2'] = essl_level
                     self.objs[name_hash]['essl_ext_symbol2'] = symbol
                     self.objs[name_hash]['essl_ext_shader_type2'] = shader_type
+                elif 'essl_ext_symbol3' not in self.objs[name_hash]:
+                    self.objs[name_hash]['essl_extension3'] = essl_extension
+                    self.objs[name_hash]['essl_ext_level3'] = essl_level
+                    self.objs[name_hash]['essl_ext_symbol3'] = symbol
+                    self.objs[name_hash]['essl_ext_shader_type3'] = shader_type
+                elif 'essl_ext_symbol4' not in self.objs[name_hash]:
+                    self.objs[name_hash]['essl_extension4'] = essl_extension
+                    self.objs[name_hash]['essl_ext_level4'] = essl_level
+                    self.objs[name_hash]['essl_ext_symbol4'] = symbol
+                    self.objs[name_hash]['essl_ext_shader_type4'] = shader_type
             else:
                 self.objs[name_hash]['essl_extension'] = essl_extension
                 self.objs[name_hash]['essl_ext_level'] = essl_level
@@ -713,6 +723,14 @@ class GroupedList:
                 if "essl_ext_symbol2" in data:
                     add_rule(rules, "ESSL", data["essl_ext_level2"], data["essl_ext_shader_type2"],
                              data["essl_extension2"], data["essl_ext_symbol2"])
+
+                if "essl_ext_symbol3" in data:
+                    add_rule(rules, "ESSL", data["essl_ext_level3"], data["essl_ext_shader_type3"],
+                             data["essl_extension3"], data["essl_ext_symbol3"])
+
+                if "essl_ext_symbol4" in data:
+                    add_rule(rules, "ESSL", data["essl_ext_level4"], data["essl_ext_shader_type4"],
+                             data["essl_extension4"], data["essl_ext_symbol4"])
 
                 name = data['name']
                 name_underscore = name.replace("(", "_")
@@ -1036,7 +1054,6 @@ def get_parsed_functions(functions_txt_filename, essl_only):
     default_metadata = {}
 
     for line in lines:
-        fun_match = fun_re.match(line)
         if line.startswith('GROUP BEGIN '):
             group_rest = line[12:].strip()
             group_parts = group_rest.split(' ', 1)
@@ -1054,6 +1071,8 @@ def get_parsed_functions(functions_txt_filename, essl_only):
             group_stack.pop()
             is_top_level_group = (len(group_stack) == 0)
             if is_top_level_group:
+                if current_group['name'] in parsed_functions:
+                    raise Exception('GROUP END: Duplicate group name "%s"' % current_group['name'])
                 parsed_functions[current_group['name']] = current_group
                 default_metadata = {}
             else:
@@ -1062,24 +1081,26 @@ def get_parsed_functions(functions_txt_filename, essl_only):
         elif line.startswith('DEFAULT METADATA'):
             line_rest = line[16:].strip()
             default_metadata = json.loads(line_rest)
-        elif fun_match:
-            return_type = fun_match.group(1)
-            name = fun_match.group(2)
-            parameters = fun_match.group(3)
-            function_props = {
-                'name': name,
-                'returnType': TType(return_type),
-                'parameters': parse_function_parameters(parameters)
-            }
-            function_props.update(default_metadata)
-            if essl_only:
-                # Skip GLSL-only functions
-                if 'essl_level' in function_props:
+        else:
+            fun_match = fun_re.match(line)
+            if fun_match:
+                return_type = fun_match.group(1)
+                name = fun_match.group(2)
+                parameters = fun_match.group(3)
+                function_props = {
+                    'name': name,
+                    'returnType': TType(return_type),
+                    'parameters': parse_function_parameters(parameters)
+                }
+                function_props.update(default_metadata)
+                if essl_only:
+                    # Skip GLSL-only functions
+                    if 'essl_level' in function_props:
+                        group_stack[-1]['functions'].append(function_props)
+                else:
                     group_stack[-1]['functions'].append(function_props)
             else:
-                group_stack[-1]['functions'].append(function_props)
-        else:
-            raise Exception('Unexpected function input line: ' + line)
+                raise Exception('Unexpected function input line: ' + line)
 
     return parsed_functions
 
@@ -1087,14 +1108,14 @@ def get_parsed_functions(functions_txt_filename, essl_only):
 def mangledNameHash(str, hashfn, script_generated_hash_tests, unmangled, save_test=True):
     hash = hashfn.hash(str)
     if save_test:
-        sanity_check = ''
+        confidence_check = ''
         if unmangled:
-            sanity_check = '    ASSERT_EQ(0x{hash}u, ImmutableString("{str}").unmangledNameHash());'.format(
+            confidence_check = '    ASSERT_EQ(0x{hash}u, ImmutableString("{str}").unmangledNameHash());'.format(
                 hash=('%08x' % hash), str=str)
         else:
-            sanity_check = '    ASSERT_EQ(0x{hash}u, ImmutableString("{str}").mangledNameHash());'.format(
+            confidence_check = '    ASSERT_EQ(0x{hash}u, ImmutableString("{str}").mangledNameHash());'.format(
                 hash=('%08x' % hash), str=str)
-        script_generated_hash_tests.update({sanity_check: None})
+        script_generated_hash_tests.update({confidence_check: None})
     return hash
 
 

@@ -24,28 +24,67 @@ namespace
 // true if varying x has a higher priority in packing than y
 bool ComparePackedVarying(const PackedVarying &x, const PackedVarying &y)
 {
-    // If the PackedVarying 'x' or 'y' to be compared is an array element, this clones an equivalent
-    // non-array shader variable 'vx' or 'vy' for actual comparison instead.
+    // If the PackedVarying 'x' or 'y' to be compared is an array element for transform feedback,
+    // this clones an equivalent non-array shader variable 'vx' or 'vy' for actual comparison
+    // instead.  For I/O block arrays, the array index is used in the comparison.
     sh::ShaderVariable vx, vy;
     const sh::ShaderVariable *px, *py;
 
     px = &x.varying();
     py = &y.varying();
 
-    if (x.isArrayElement())
+    if (x.isTransformFeedbackArrayElement())
     {
         vx = *px;
         vx.arraySizes.clear();
         px = &vx;
     }
 
-    if (y.isArrayElement())
+    if (y.isTransformFeedbackArrayElement())
     {
         vy = *py;
         vy.arraySizes.clear();
         py = &vy;
     }
 
+    // Make sure struct fields end up together.
+    if (x.isStructField() != y.isStructField())
+    {
+        return x.isStructField();
+    }
+
+    if (x.isStructField())
+    {
+        ASSERT(y.isStructField());
+
+        if (x.getParentStructName() != y.getParentStructName())
+        {
+            return x.getParentStructName() < y.getParentStructName();
+        }
+    }
+
+    // For I/O block fields, order first by array index:
+    if (!x.isTransformFeedbackArrayElement() && !y.isTransformFeedbackArrayElement())
+    {
+        if (x.arrayIndex != y.arrayIndex)
+        {
+            return x.arrayIndex < y.arrayIndex;
+        }
+    }
+
+    // Then order by field index
+    if (x.fieldIndex != y.fieldIndex)
+    {
+        return x.fieldIndex < y.fieldIndex;
+    }
+
+    // Then order by secondary field index
+    if (x.secondaryFieldIndex != y.secondaryFieldIndex)
+    {
+        return x.secondaryFieldIndex < y.secondaryFieldIndex;
+    }
+
+    // Otherwise order by variable
     return gl::CompareShaderVar(*px, *py);
 }
 
@@ -77,18 +116,27 @@ VaryingInShaderRef &VaryingInShaderRef::operator=(VaryingInShaderRef &&other)
 PackedVarying::PackedVarying(VaryingInShaderRef &&frontVaryingIn,
                              VaryingInShaderRef &&backVaryingIn,
                              sh::InterpolationType interpolationIn)
-    : PackedVarying(std::move(frontVaryingIn), std::move(backVaryingIn), interpolationIn, 0)
+    : PackedVarying(std::move(frontVaryingIn),
+                    std::move(backVaryingIn),
+                    interpolationIn,
+                    GL_INVALID_INDEX,
+                    0,
+                    0)
 {}
 
 PackedVarying::PackedVarying(VaryingInShaderRef &&frontVaryingIn,
                              VaryingInShaderRef &&backVaryingIn,
                              sh::InterpolationType interpolationIn,
-                             GLuint fieldIndexIn)
+                             GLuint arrayIndexIn,
+                             GLuint fieldIndexIn,
+                             GLuint secondaryFieldIndexIn)
     : frontVarying(std::move(frontVaryingIn)),
       backVarying(std::move(backVaryingIn)),
       interpolation(interpolationIn),
-      arrayIndex(GL_INVALID_INDEX),
-      fieldIndex(fieldIndexIn)
+      arrayIndex(arrayIndexIn),
+      isTransformFeedback(false),
+      fieldIndex(fieldIndexIn),
+      secondaryFieldIndex(secondaryFieldIndexIn)
 {}
 
 PackedVarying::~PackedVarying() = default;
@@ -106,7 +154,9 @@ PackedVarying &PackedVarying::operator=(PackedVarying &&other)
     std::swap(backVarying, other.backVarying);
     std::swap(interpolation, other.interpolation);
     std::swap(arrayIndex, other.arrayIndex);
+    std::swap(isTransformFeedback, other.isTransformFeedback);
     std::swap(fieldIndex, other.fieldIndex);
+    std::swap(secondaryFieldIndex, other.secondaryFieldIndex);
 
     return *this;
 }
@@ -124,9 +174,14 @@ void VaryingPacking::reset()
     mRegisterList.clear();
     mPackedVaryings.clear();
 
-    for (std::vector<std::string> inactiveVaryingMappedNames : mInactiveVaryingMappedNames)
+    for (std::vector<std::string> &inactiveVaryingMappedNames : mInactiveVaryingMappedNames)
     {
         inactiveVaryingMappedNames.clear();
+    }
+
+    for (std::vector<std::string> &activeBuiltIns : mActiveOutputBuiltIns)
+    {
+        activeBuiltIns.clear();
     }
 }
 
@@ -170,7 +225,7 @@ bool VaryingPacking::packVarying(const PackedVarying &packedVarying)
     // GLSL ES 3.10 section 4.3.6: Output variables cannot be arrays of arrays or arrays of
     // structures, so we may use getBasicTypeElementCount().
     const unsigned int elementCount = varying.getBasicTypeElementCount();
-    varyingRows *= (packedVarying.isArrayElement() ? 1 : elementCount);
+    varyingRows *= (packedVarying.isTransformFeedbackArrayElement() ? 1 : elementCount);
 
     unsigned int maxVaryingVectors = static_cast<unsigned int>(mRegisterMap.size());
 
@@ -265,7 +320,8 @@ bool VaryingPacking::packVarying(const PackedVarying &packedVarying)
                     registerInfo.registerRow    = row + arrayIndex;
                     registerInfo.registerColumn = bestColumn;
                     registerInfo.varyingArrayIndex =
-                        (packedVarying.isArrayElement() ? packedVarying.arrayIndex : arrayIndex);
+                        (packedVarying.isTransformFeedbackArrayElement() ? packedVarying.arrayIndex
+                                                                         : arrayIndex);
                     registerInfo.varyingRowIndex = 0;
                     // Do not record register info for builtins.
                     // TODO(jmadill): Clean this up.
@@ -327,7 +383,8 @@ void VaryingPacking::insert(unsigned int registerRow,
     const unsigned int arrayElementCount = varying.getBasicTypeElementCount();
     for (unsigned int arrayElement = 0; arrayElement < arrayElementCount; ++arrayElement)
     {
-        if (packedVarying.isArrayElement() && arrayElement != packedVarying.arrayIndex)
+        if (packedVarying.isTransformFeedbackArrayElement() &&
+            arrayElement != packedVarying.arrayIndex)
         {
             continue;
         }
@@ -364,12 +421,12 @@ void VaryingPacking::packUserVarying(const ProgramVaryingRef &ref,
     VaryingInShaderRef backVarying(ref.backShaderStage, output);
 
     mPackedVaryings.emplace_back(std::move(frontVarying), std::move(backVarying), interpolation);
-    if (input)
+    if (input && !input->isBuiltIn())
     {
         (*uniqueFullNames)[ref.frontShaderStage].insert(
             mPackedVaryings.back().fullName(ref.frontShaderStage));
     }
-    if (output)
+    if (output && !output->isBuiltIn())
     {
         (*uniqueFullNames)[ref.backShaderStage].insert(
             mPackedVaryings.back().fullName(ref.backShaderStage));
@@ -377,7 +434,9 @@ void VaryingPacking::packUserVarying(const ProgramVaryingRef &ref,
 }
 
 void VaryingPacking::packUserVaryingField(const ProgramVaryingRef &ref,
+                                          GLuint arrayIndex,
                                           GLuint fieldIndex,
+                                          GLuint secondaryFieldIndex,
                                           VaryingUniqueFullNames *uniqueFullNames)
 {
     const sh::ShaderVariable *input  = ref.frontShader;
@@ -389,24 +448,47 @@ void VaryingPacking::packUserVaryingField(const ProgramVaryingRef &ref,
     const sh::ShaderVariable *frontField = input ? &input->fields[fieldIndex] : nullptr;
     const sh::ShaderVariable *backField  = output ? &output->fields[fieldIndex] : nullptr;
 
+    if (secondaryFieldIndex != GL_INVALID_INDEX)
+    {
+        frontField = frontField ? &frontField->fields[secondaryFieldIndex] : nullptr;
+        backField  = backField ? &backField->fields[secondaryFieldIndex] : nullptr;
+    }
+
     VaryingInShaderRef frontVarying(ref.frontShaderStage, frontField);
     VaryingInShaderRef backVarying(ref.backShaderStage, backField);
 
     if (input)
     {
-        ASSERT(!frontField->isStruct() && !frontField->isArray());
-        frontVarying.parentStructName       = input->name;
-        frontVarying.parentStructMappedName = input->mappedName;
+        if (frontField->isShaderIOBlock)
+        {
+            frontVarying.parentStructName       = input->structName;
+            frontVarying.parentStructMappedName = input->mappedStructName;
+        }
+        else
+        {
+            ASSERT(!frontField->isStruct() && !frontField->isArray());
+            frontVarying.parentStructName       = input->name;
+            frontVarying.parentStructMappedName = input->mappedName;
+        }
     }
     if (output)
     {
-        ASSERT(!backField->isStruct() && !backField->isArray());
-        backVarying.parentStructName       = output->name;
-        backVarying.parentStructMappedName = output->mappedName;
+        if (backField->isShaderIOBlock)
+        {
+            backVarying.parentStructName       = output->structName;
+            backVarying.parentStructMappedName = output->mappedStructName;
+        }
+        else
+        {
+            ASSERT(!backField->isStruct() && !backField->isArray());
+            backVarying.parentStructName       = output->name;
+            backVarying.parentStructMappedName = output->mappedName;
+        }
     }
 
     mPackedVaryings.emplace_back(std::move(frontVarying), std::move(backVarying), interpolation,
-                                 fieldIndex);
+                                 arrayIndex, fieldIndex,
+                                 secondaryFieldIndex == GL_INVALID_INDEX ? 0 : secondaryFieldIndex);
 
     if (input)
     {
@@ -429,7 +511,8 @@ void VaryingPacking::packUserVaryingTF(const ProgramVaryingRef &ref, size_t subs
 
     mPackedVaryings.emplace_back(std::move(frontVarying), std::move(backVarying),
                                  input->interpolation);
-    mPackedVaryings.back().arrayIndex = static_cast<GLuint>(subscript);
+    mPackedVaryings.back().arrayIndex          = static_cast<GLuint>(subscript);
+    mPackedVaryings.back().isTransformFeedback = true;
 }
 
 void VaryingPacking::packUserVaryingFieldTF(const ProgramVaryingRef &ref,
@@ -445,7 +528,7 @@ void VaryingPacking::packUserVaryingFieldTF(const ProgramVaryingRef &ref,
     frontVarying.parentStructMappedName = input->mappedName;
 
     mPackedVaryings.emplace_back(std::move(frontVarying), std::move(backVarying),
-                                 input->interpolation, fieldIndex);
+                                 input->interpolation, GL_INVALID_INDEX, fieldIndex, 0);
 }
 
 bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
@@ -454,22 +537,31 @@ bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
                                                 const bool isSeparableProgram)
 {
     VaryingUniqueFullNames uniqueFullNames;
-    mPackedVaryings.clear();
-    clearRegisterMap();
+
+    reset();
 
     for (const ProgramVaryingRef &ref : mergedVaryings)
     {
         const sh::ShaderVariable *input  = ref.frontShader;
         const sh::ShaderVariable *output = ref.backShader;
 
+        const bool isActiveBuiltInInput  = input && input->isBuiltIn() && input->active;
+        const bool isActiveBuiltInOutput = output && output->isBuiltIn() && output->active;
+
+        // Keep track of output builtins that are used by the shader, such as gl_Position,
+        // gl_PointSize etc.
+        if (isActiveBuiltInInput)
+        {
+            mActiveOutputBuiltIns[ref.frontShaderStage].push_back(input->name);
+        }
+
         // Only pack statically used varyings that have a matched input or output, plus special
         // builtins. Note that we pack all statically used user-defined varyings even if they are
         // not active. GLES specs are a bit vague on whether it's allowed to only pack active
         // varyings, though GLES 3.1 spec section 11.1.2.1 says that "device-dependent
         // optimizations" may be used to make vertex shader outputs fit.
-        if ((input && output && output->staticUse) ||
-            (input && input->isBuiltIn() && input->active) ||
-            (output && output->isBuiltIn() && output->active) ||
+        if ((input && output && output->staticUse) || isActiveBuiltInInput ||
+            isActiveBuiltInOutput ||
             (isSeparableProgram && ((input && input->active) || (output && output->active))))
         {
             const sh::ShaderVariable *varying = output ? output : input;
@@ -481,11 +573,44 @@ bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
             {
                 if (varying->isStruct())
                 {
-                    ASSERT(!(varying->isArray() && varying == input));
+                    const std::vector<unsigned int> &arraySizes = varying->arraySizes;
+                    size_t arrayDimensions                      = arraySizes.size();
 
-                    for (GLuint fieldIndex = 0; fieldIndex < varying->fields.size(); ++fieldIndex)
+                    // Geometry shader inputs have an extra level of array-ness that should be
+                    // removed.
+                    if (varying == output && ref.backShaderStage == ShaderType::Geometry)
                     {
-                        packUserVaryingField(ref, fieldIndex, &uniqueFullNames);
+                        ASSERT(arrayDimensions > 0);
+                        --arrayDimensions;
+                    }
+
+                    ASSERT(arrayDimensions <= 1);
+                    const bool isArray     = arrayDimensions > 0;
+                    const GLuint arraySize = isArray ? arraySizes[0] : 1;
+
+                    for (GLuint arrayIndex = 0; arrayIndex < arraySize; ++arrayIndex)
+                    {
+                        const GLuint effectiveArrayIndex = isArray ? arrayIndex : GL_INVALID_INDEX;
+                        for (GLuint fieldIndex = 0; fieldIndex < varying->fields.size();
+                             ++fieldIndex)
+                        {
+                            if (varying->fields[fieldIndex].isStruct())
+                            {
+
+                                for (GLuint nestedIndex = 0;
+                                     nestedIndex < varying->fields[fieldIndex].fields.size();
+                                     nestedIndex++)
+                                {
+                                    packUserVaryingField(ref, effectiveArrayIndex, fieldIndex,
+                                                         nestedIndex, &uniqueFullNames);
+                                }
+                            }
+                            else
+                            {
+                                packUserVaryingField(ref, effectiveArrayIndex, fieldIndex,
+                                                     GL_INVALID_INDEX, &uniqueFullNames);
+                            }
+                        }
                     }
                     if (input)
                     {
@@ -508,7 +633,10 @@ bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
         // program, in which case the input shader may not exist in this program.
         if (!input && !isSeparableProgram)
         {
-            mInactiveVaryingMappedNames[ref.backShaderStage].push_back(output->mappedName);
+            if (!output->isBuiltIn())
+            {
+                mInactiveVaryingMappedNames[ref.backShaderStage].push_back(output->mappedName);
+            }
             continue;
         }
 
@@ -530,9 +658,8 @@ bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
             }
             if (input->isStruct())
             {
-                GLuint fieldIndex = 0;
-                const sh::ShaderVariable *field =
-                    FindShaderVarField(*input, tfVarying, &fieldIndex);
+                GLuint fieldIndex               = 0;
+                const sh::ShaderVariable *field = input->findField(tfVarying, &fieldIndex);
                 if (field != nullptr)
                 {
                     ASSERT(!field->isStruct() && !field->isArray());
@@ -561,11 +688,13 @@ bool VaryingPacking::collectAndPackUserVaryings(gl::InfoLog &infoLog,
             }
         }
 
-        if (input && uniqueFullNames[ref.frontShaderStage].count(input->name) == 0)
+        if (input && !input->isBuiltIn() &&
+            uniqueFullNames[ref.frontShaderStage].count(input->name) == 0)
         {
             mInactiveVaryingMappedNames[ref.frontShaderStage].push_back(input->mappedName);
         }
-        if (output && uniqueFullNames[ref.backShaderStage].count(output->name) == 0)
+        if (output && !output->isBuiltIn() &&
+            uniqueFullNames[ref.backShaderStage].count(output->name) == 0)
         {
             mInactiveVaryingMappedNames[ref.backShaderStage].push_back(output->mappedName);
         }

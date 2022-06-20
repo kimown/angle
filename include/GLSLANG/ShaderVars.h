@@ -28,6 +28,7 @@ enum InterpolationType
 {
     INTERPOLATION_SMOOTH,
     INTERPOLATION_CENTROID,
+    INTERPOLATION_SAMPLE,
     INTERPOLATION_FLAT,
     INTERPOLATION_NOPERSPECTIVE
 };
@@ -50,11 +51,6 @@ enum class BlockType
 {
     BLOCK_UNIFORM,
     BLOCK_BUFFER,
-
-    // Required in OpenGL ES 3.1 extension GL_OES_shader_io_blocks.
-    // TODO(jiawei.shao@intel.com): add BLOCK_OUT.
-    // Also used in GLSL
-    BLOCK_IN
 };
 
 // Base class for all variables defined in shaders, including Varyings, Uniforms, etc
@@ -120,6 +116,10 @@ struct ShaderVariable
                               const ShaderVariable **leafVar,
                               std::string *originalFullName) const;
 
+    // Find the child field which matches 'fullName' == var.name + "." + field.name.
+    // Return nullptr if not found.
+    const sh::ShaderVariable *findField(const std::string &fullName, uint32_t *fieldIndexOut) const;
+
     bool isBuiltIn() const;
     bool isEmulatedBuiltIn() const;
 
@@ -153,7 +153,10 @@ struct ShaderVariable
     // necessarily active. GLES 3.0.5 section 2.12.6. GLES 3.1 section 7.3.1.
     bool active;
     std::vector<ShaderVariable> fields;
+    // Struct name is used for varyings of struct type.  Additionally, it's used with shader I/O
+    // blocks, in which case it contains the block name.
     std::string structName;
+    std::string mappedStructName;
 
     // Only applies to interface block fields. Kept here for simplicity.
     bool isRowMajorLayout;
@@ -161,10 +164,18 @@ struct ShaderVariable
     // VariableWithLocation
     int location;
 
+    // The location of inputs or outputs without location layout quailifer will be updated to '-1'.
+    // GLES Spec 3.1, Section 7.3. PROGRAM OBJECTS
+    // Not all active variables are assigned valid locations;
+    // the following variables will have an effective location of -1:
+    bool hasImplicitLocation;
+    void resetEffectiveLocation();
+    void updateEffectiveLocation(const sh::ShaderVariable &parent);
+
     // Uniform
     int binding;
     // Decide whether two uniforms are the same at shader link time,
-    // assuming one from vertex shader and the other from fragment shader.
+    // assuming they are from consecutive shader stages.
     // GLSL ES Spec 3.00.3, section 4.3.5.
     // GLSL ES Spec 3.10.4, section 4.4.5
     bool isSameUniformAtLinkTime(const ShaderVariable &other) const;
@@ -177,24 +188,34 @@ struct ShaderVariable
     // From EXT_blend_func_extended.
     int index;
 
+    // From EXT_YUV_target
+    bool yuv;
+
     // InterfaceBlockField
     // Decide whether two InterfaceBlock fields are the same at shader
-    // link time, assuming one from vertex shader and the other from
-    // fragment shader.
+    // link time, assuming they are from consecutive shader stages.
     // See GLSL ES Spec 3.00.3, sec 4.3.7.
     bool isSameInterfaceBlockFieldAtLinkTime(const ShaderVariable &other) const;
 
     // Varying
     InterpolationType interpolation;
     bool isInvariant;
+    bool isShaderIOBlock;
     // Decide whether two varyings are the same at shader link time,
-    // assuming one from vertex shader and the other from fragment shader.
+    // assuming they are from consecutive shader stages.
     // Invariance needs to match only in ESSL1. Relevant spec sections:
     // GLSL ES 3.00.4, sections 4.6.1 and 4.3.9.
     // GLSL ES 1.00.17, section 4.6.4.
     bool isSameVaryingAtLinkTime(const ShaderVariable &other, int shaderVersion) const;
     // Deprecated version of isSameVaryingAtLinkTime, which assumes ESSL1.
     bool isSameVaryingAtLinkTime(const ShaderVariable &other) const;
+
+    // Shader I/O blocks may match by block name or instance, based on whether both stages have an
+    // instance name or not.
+    bool isSameNameAtLinkTime(const ShaderVariable &other) const;
+
+    // If the variable is a sampler that has ever been statically used with texelFetch
+    bool texelFetchStaticUse;
 
   protected:
     bool isSameVariableAtLinkTime(const ShaderVariable &other,

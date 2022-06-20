@@ -8,8 +8,8 @@
 // capture_gles_ext_autogen.h:
 //   Capture functions for the OpenGL ES extension entry points.
 
-#ifndef LIBANGLE_CAPTURE_GLES_ext_AUTOGEN_H_
-#define LIBANGLE_CAPTURE_GLES_ext_AUTOGEN_H_
+#ifndef LIBANGLE_CAPTURE_GLES_EXT_AUTOGEN_H_
+#define LIBANGLE_CAPTURE_GLES_EXT_AUTOGEN_H_
 
 #include "common/PackedEnums.h"
 #include "libANGLE/FrameCapture.h"
@@ -128,6 +128,20 @@ angle::CallCapture CaptureGetRenderbufferImageANGLE(const State &glState,
                                                     GLenum type,
                                                     void *pixels);
 
+// GL_ANGLE_get_tex_level_parameter
+angle::CallCapture CaptureGetTexLevelParameterivANGLE(const State &glState,
+                                                      bool isCallValid,
+                                                      TextureTarget targetPacked,
+                                                      GLint level,
+                                                      GLenum pname,
+                                                      GLint *params);
+angle::CallCapture CaptureGetTexLevelParameterfvANGLE(const State &glState,
+                                                      bool isCallValid,
+                                                      TextureTarget targetPacked,
+                                                      GLint level,
+                                                      GLenum pname,
+                                                      GLfloat *params);
+
 // GL_ANGLE_instanced_arrays
 angle::CallCapture CaptureDrawArraysInstancedANGLE(const State &glState,
                                                    bool isCallValid,
@@ -146,6 +160,56 @@ angle::CallCapture CaptureVertexAttribDivisorANGLE(const State &glState,
                                                    bool isCallValid,
                                                    GLuint index,
                                                    GLuint divisor);
+
+// GL_ANGLE_memory_object_flags
+angle::CallCapture CaptureTexStorageMemFlags2DANGLE(const State &glState,
+                                                    bool isCallValid,
+                                                    TextureType targetPacked,
+                                                    GLsizei levels,
+                                                    GLenum internalFormat,
+                                                    GLsizei width,
+                                                    GLsizei height,
+                                                    MemoryObjectID memoryPacked,
+                                                    GLuint64 offset,
+                                                    GLbitfield createFlags,
+                                                    GLbitfield usageFlags);
+angle::CallCapture CaptureTexStorageMemFlags2DMultisampleANGLE(const State &glState,
+                                                               bool isCallValid,
+                                                               TextureType targetPacked,
+                                                               GLsizei samples,
+                                                               GLenum internalFormat,
+                                                               GLsizei width,
+                                                               GLsizei height,
+                                                               GLboolean fixedSampleLocations,
+                                                               MemoryObjectID memoryPacked,
+                                                               GLuint64 offset,
+                                                               GLbitfield createFlags,
+                                                               GLbitfield usageFlags);
+angle::CallCapture CaptureTexStorageMemFlags3DANGLE(const State &glState,
+                                                    bool isCallValid,
+                                                    TextureType targetPacked,
+                                                    GLsizei levels,
+                                                    GLenum internalFormat,
+                                                    GLsizei width,
+                                                    GLsizei height,
+                                                    GLsizei depth,
+                                                    MemoryObjectID memoryPacked,
+                                                    GLuint64 offset,
+                                                    GLbitfield createFlags,
+                                                    GLbitfield usageFlags);
+angle::CallCapture CaptureTexStorageMemFlags3DMultisampleANGLE(const State &glState,
+                                                               bool isCallValid,
+                                                               TextureType targetPacked,
+                                                               GLsizei samples,
+                                                               GLenum internalFormat,
+                                                               GLsizei width,
+                                                               GLsizei height,
+                                                               GLsizei depth,
+                                                               GLboolean fixedSampleLocations,
+                                                               MemoryObjectID memoryPacked,
+                                                               GLuint64 offset,
+                                                               GLbitfield createFlags,
+                                                               GLbitfield usageFlags);
 
 // GL_ANGLE_memory_object_fuchsia
 angle::CallCapture CaptureImportMemoryZirconHandleANGLE(const State &glState,
@@ -730,18 +794,6 @@ angle::CallCapture CaptureTexStorage2DMultisampleANGLE(const State &glState,
                                                        GLsizei width,
                                                        GLsizei height,
                                                        GLboolean fixedsamplelocations);
-angle::CallCapture CaptureGetTexLevelParameterivANGLE(const State &glState,
-                                                      bool isCallValid,
-                                                      TextureTarget targetPacked,
-                                                      GLint level,
-                                                      GLenum pname,
-                                                      GLint *params);
-angle::CallCapture CaptureGetTexLevelParameterfvANGLE(const State &glState,
-                                                      bool isCallValid,
-                                                      TextureTarget targetPacked,
-                                                      GLint level,
-                                                      GLenum pname,
-                                                      GLfloat *params);
 angle::CallCapture CaptureGetMultisamplefvANGLE(const State &glState,
                                                 bool isCallValid,
                                                 GLenum pname,
@@ -816,6 +868,8 @@ angle::CallCapture CaptureLoseContextCHROMIUM(const State &glState,
 
 // GL_EXT_EGL_image_array
 
+// GL_EXT_YUV_target
+
 // GL_EXT_blend_func_extended
 angle::CallCapture CaptureBindFragDataLocationEXT(const State &glState,
                                                   bool isCallValid,
@@ -839,6 +893,48 @@ angle::CallCapture CaptureGetProgramResourceLocationIndexEXT(const State &glStat
                                                              GLenum programInterface,
                                                              const GLchar *name,
                                                              GLint returnValue);
+
+// GL_EXT_buffer_storage
+angle::CallCapture CaptureBufferStorageEXT(const State &glState,
+                                           bool isCallValid,
+                                           BufferBinding targetPacked,
+                                           GLsizeiptr size,
+                                           const void *data,
+                                           GLbitfield flags);
+
+// GL_EXT_copy_image
+angle::CallCapture CaptureCopyImageSubDataEXT(const State &glState,
+                                              bool isCallValid,
+                                              GLuint srcName,
+                                              GLenum srcTarget,
+                                              GLint srcLevel,
+                                              GLint srcX,
+                                              GLint srcY,
+                                              GLint srcZ,
+                                              GLuint dstName,
+                                              GLenum dstTarget,
+                                              GLint dstLevel,
+                                              GLint dstX,
+                                              GLint dstY,
+                                              GLint dstZ,
+                                              GLsizei srcWidth,
+                                              GLsizei srcHeight,
+                                              GLsizei srcDepth);
+
+// GL_EXT_debug_label
+angle::CallCapture CaptureGetObjectLabelEXT(const State &glState,
+                                            bool isCallValid,
+                                            GLenum type,
+                                            GLuint object,
+                                            GLsizei bufSize,
+                                            GLsizei *length,
+                                            GLchar *label);
+angle::CallCapture CaptureLabelObjectEXT(const State &glState,
+                                         bool isCallValid,
+                                         GLenum type,
+                                         GLuint object,
+                                         GLsizei length,
+                                         const GLchar *label);
 
 // GL_EXT_debug_marker
 angle::CallCapture CaptureInsertEventMarkerEXT(const State &glState,
@@ -995,6 +1091,22 @@ angle::CallCapture CaptureMultiDrawElementsBaseVertexEXT(const State &glState,
                                                          GLsizei primcount,
                                                          const GLint *basevertex);
 
+// GL_EXT_external_buffer
+angle::CallCapture CaptureBufferStorageExternalEXT(const State &glState,
+                                                   bool isCallValid,
+                                                   BufferBinding targetPacked,
+                                                   GLintptr offset,
+                                                   GLsizeiptr size,
+                                                   GLeglClientBufferEXT clientBuffer,
+                                                   GLbitfield flags);
+angle::CallCapture CaptureNamedBufferStorageExternalEXT(const State &glState,
+                                                        bool isCallValid,
+                                                        GLuint buffer,
+                                                        GLintptr offset,
+                                                        GLsizeiptr size,
+                                                        GLeglClientBufferEXT clientBuffer,
+                                                        GLbitfield flags);
+
 // GL_EXT_geometry_shader
 angle::CallCapture CaptureFramebufferTextureEXT(const State &glState,
                                                 bool isCallValid,
@@ -1128,8 +1240,8 @@ angle::CallCapture CaptureFramebufferTexture2DMultisampleEXT(const State &glStat
                                                              bool isCallValid,
                                                              GLenum target,
                                                              GLenum attachment,
-                                                             GLenum textarget,
-                                                             GLuint texture,
+                                                             TextureTarget textargetPacked,
+                                                             TextureID texturePacked,
                                                              GLint level,
                                                              GLsizei samples);
 angle::CallCapture CaptureRenderbufferStorageMultisampleEXT(const State &glState,
@@ -1219,6 +1331,292 @@ angle::CallCapture CaptureImportSemaphoreFdEXT(const State &glState,
                                                SemaphoreID semaphorePacked,
                                                HandleType handleTypePacked,
                                                GLint fd);
+
+// GL_EXT_separate_shader_objects
+angle::CallCapture CaptureActiveShaderProgramEXT(const State &glState,
+                                                 bool isCallValid,
+                                                 ProgramPipelineID pipelinePacked,
+                                                 ShaderProgramID programPacked);
+angle::CallCapture CaptureBindProgramPipelineEXT(const State &glState,
+                                                 bool isCallValid,
+                                                 ProgramPipelineID pipelinePacked);
+angle::CallCapture CaptureCreateShaderProgramvEXT(const State &glState,
+                                                  bool isCallValid,
+                                                  ShaderType typePacked,
+                                                  GLsizei count,
+                                                  const GLchar **strings,
+                                                  GLuint returnValue);
+angle::CallCapture CaptureDeleteProgramPipelinesEXT(const State &glState,
+                                                    bool isCallValid,
+                                                    GLsizei n,
+                                                    const ProgramPipelineID *pipelinesPacked);
+angle::CallCapture CaptureGenProgramPipelinesEXT(const State &glState,
+                                                 bool isCallValid,
+                                                 GLsizei n,
+                                                 ProgramPipelineID *pipelinesPacked);
+angle::CallCapture CaptureGetProgramPipelineInfoLogEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ProgramPipelineID pipelinePacked,
+                                                       GLsizei bufSize,
+                                                       GLsizei *length,
+                                                       GLchar *infoLog);
+angle::CallCapture CaptureGetProgramPipelineivEXT(const State &glState,
+                                                  bool isCallValid,
+                                                  ProgramPipelineID pipelinePacked,
+                                                  GLenum pname,
+                                                  GLint *params);
+angle::CallCapture CaptureIsProgramPipelineEXT(const State &glState,
+                                               bool isCallValid,
+                                               ProgramPipelineID pipelinePacked,
+                                               GLboolean returnValue);
+angle::CallCapture CaptureProgramParameteriEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               GLenum pname,
+                                               GLint value);
+angle::CallCapture CaptureProgramUniform1fEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLfloat v0);
+angle::CallCapture CaptureProgramUniform1fvEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLfloat *value);
+angle::CallCapture CaptureProgramUniform1iEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLint v0);
+angle::CallCapture CaptureProgramUniform1ivEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLint *value);
+angle::CallCapture CaptureProgramUniform1uiEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLuint v0);
+angle::CallCapture CaptureProgramUniform1uivEXT(const State &glState,
+                                                bool isCallValid,
+                                                ShaderProgramID programPacked,
+                                                UniformLocation locationPacked,
+                                                GLsizei count,
+                                                const GLuint *value);
+angle::CallCapture CaptureProgramUniform2fEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLfloat v0,
+                                              GLfloat v1);
+angle::CallCapture CaptureProgramUniform2fvEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLfloat *value);
+angle::CallCapture CaptureProgramUniform2iEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLint v0,
+                                              GLint v1);
+angle::CallCapture CaptureProgramUniform2ivEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLint *value);
+angle::CallCapture CaptureProgramUniform2uiEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLuint v0,
+                                               GLuint v1);
+angle::CallCapture CaptureProgramUniform2uivEXT(const State &glState,
+                                                bool isCallValid,
+                                                ShaderProgramID programPacked,
+                                                UniformLocation locationPacked,
+                                                GLsizei count,
+                                                const GLuint *value);
+angle::CallCapture CaptureProgramUniform3fEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLfloat v0,
+                                              GLfloat v1,
+                                              GLfloat v2);
+angle::CallCapture CaptureProgramUniform3fvEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLfloat *value);
+angle::CallCapture CaptureProgramUniform3iEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLint v0,
+                                              GLint v1,
+                                              GLint v2);
+angle::CallCapture CaptureProgramUniform3ivEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLint *value);
+angle::CallCapture CaptureProgramUniform3uiEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLuint v0,
+                                               GLuint v1,
+                                               GLuint v2);
+angle::CallCapture CaptureProgramUniform3uivEXT(const State &glState,
+                                                bool isCallValid,
+                                                ShaderProgramID programPacked,
+                                                UniformLocation locationPacked,
+                                                GLsizei count,
+                                                const GLuint *value);
+angle::CallCapture CaptureProgramUniform4fEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLfloat v0,
+                                              GLfloat v1,
+                                              GLfloat v2,
+                                              GLfloat v3);
+angle::CallCapture CaptureProgramUniform4fvEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLfloat *value);
+angle::CallCapture CaptureProgramUniform4iEXT(const State &glState,
+                                              bool isCallValid,
+                                              ShaderProgramID programPacked,
+                                              UniformLocation locationPacked,
+                                              GLint v0,
+                                              GLint v1,
+                                              GLint v2,
+                                              GLint v3);
+angle::CallCapture CaptureProgramUniform4ivEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               const GLint *value);
+angle::CallCapture CaptureProgramUniform4uiEXT(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLuint v0,
+                                               GLuint v1,
+                                               GLuint v2,
+                                               GLuint v3);
+angle::CallCapture CaptureProgramUniform4uivEXT(const State &glState,
+                                                bool isCallValid,
+                                                ShaderProgramID programPacked,
+                                                UniformLocation locationPacked,
+                                                GLsizei count,
+                                                const GLuint *value);
+angle::CallCapture CaptureProgramUniformMatrix2fvEXT(const State &glState,
+                                                     bool isCallValid,
+                                                     ShaderProgramID programPacked,
+                                                     UniformLocation locationPacked,
+                                                     GLsizei count,
+                                                     GLboolean transpose,
+                                                     const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix2x3fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix2x4fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix3fvEXT(const State &glState,
+                                                     bool isCallValid,
+                                                     ShaderProgramID programPacked,
+                                                     UniformLocation locationPacked,
+                                                     GLsizei count,
+                                                     GLboolean transpose,
+                                                     const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix3x2fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix3x4fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix4fvEXT(const State &glState,
+                                                     bool isCallValid,
+                                                     ShaderProgramID programPacked,
+                                                     UniformLocation locationPacked,
+                                                     GLsizei count,
+                                                     GLboolean transpose,
+                                                     const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix4x2fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureProgramUniformMatrix4x3fvEXT(const State &glState,
+                                                       bool isCallValid,
+                                                       ShaderProgramID programPacked,
+                                                       UniformLocation locationPacked,
+                                                       GLsizei count,
+                                                       GLboolean transpose,
+                                                       const GLfloat *value);
+angle::CallCapture CaptureUseProgramStagesEXT(const State &glState,
+                                              bool isCallValid,
+                                              ProgramPipelineID pipelinePacked,
+                                              GLbitfield stages,
+                                              ShaderProgramID programPacked);
+angle::CallCapture CaptureValidateProgramPipelineEXT(const State &glState,
+                                                     bool isCallValid,
+                                                     ProgramPipelineID pipelinePacked);
+
+// GL_EXT_shader_io_blocks
+
+// GL_EXT_tessellation_shader
+angle::CallCapture CapturePatchParameteriEXT(const State &glState,
+                                             bool isCallValid,
+                                             GLenum pname,
+                                             GLint value);
+
+// GL_EXT_texture_buffer
+angle::CallCapture CaptureTexBufferEXT(const State &glState,
+                                       bool isCallValid,
+                                       TextureType targetPacked,
+                                       GLenum internalformat,
+                                       BufferID bufferPacked);
+angle::CallCapture CaptureTexBufferRangeEXT(const State &glState,
+                                            bool isCallValid,
+                                            TextureType targetPacked,
+                                            GLenum internalformat,
+                                            BufferID bufferPacked,
+                                            GLintptr offset,
+                                            GLsizeiptr size);
 
 // GL_EXT_texture_compression_bptc
 
@@ -1375,6 +1773,25 @@ angle::CallCapture CaptureEGLImageTargetTexture2DOES(const State &glState,
                                                      GLeglImageOES image);
 
 // GL_OES_compressed_ETC1_RGB8_texture
+
+// GL_OES_copy_image
+angle::CallCapture CaptureCopyImageSubDataOES(const State &glState,
+                                              bool isCallValid,
+                                              GLuint srcName,
+                                              GLenum srcTarget,
+                                              GLint srcLevel,
+                                              GLint srcX,
+                                              GLint srcY,
+                                              GLint srcZ,
+                                              GLuint dstName,
+                                              GLenum dstTarget,
+                                              GLint dstLevel,
+                                              GLint dstX,
+                                              GLint dstY,
+                                              GLint dstZ,
+                                              GLsizei srcWidth,
+                                              GLsizei srcHeight,
+                                              GLsizei srcDepth);
 
 // GL_OES_depth32
 
@@ -1621,6 +2038,13 @@ angle::CallCapture CaptureQueryMatrixxOES(const State &glState,
                                           GLint *exponent,
                                           GLbitfield returnValue);
 
+// GL_OES_sample_shading
+angle::CallCapture CaptureMinSampleShadingOES(const State &glState,
+                                              bool isCallValid,
+                                              GLfloat value);
+
+// GL_OES_shader_io_blocks
+
 // GL_OES_texture_3D
 angle::CallCapture CaptureCompressedTexImage3DOES(const State &glState,
                                                   bool isCallValid,
@@ -1733,6 +2157,20 @@ angle::CallCapture CaptureTexParameterIuivOES(const State &glState,
                                               GLenum pname,
                                               const GLuint *params);
 
+// GL_OES_texture_buffer
+angle::CallCapture CaptureTexBufferOES(const State &glState,
+                                       bool isCallValid,
+                                       TextureType targetPacked,
+                                       GLenum internalformat,
+                                       BufferID bufferPacked);
+angle::CallCapture CaptureTexBufferRangeOES(const State &glState,
+                                            bool isCallValid,
+                                            TextureType targetPacked,
+                                            GLenum internalformat,
+                                            BufferID bufferPacked,
+                                            GLintptr offset,
+                                            GLsizeiptr size);
+
 // GL_OES_texture_cube_map
 angle::CallCapture CaptureGetTexGenfvOES(const State &glState,
                                          bool isCallValid,
@@ -1783,6 +2221,8 @@ angle::CallCapture CaptureTexGenxvOES(const State &glState,
 // GL_OES_texture_cube_map_array
 
 // GL_OES_texture_half_float
+
+// GL_OES_texture_stencil8
 
 // GL_OES_texture_storage_multisample_2d_array
 angle::CallCapture CaptureTexStorage3DMultisampleOES(const State &glState,
@@ -1950,6 +2390,20 @@ void CaptureGetRenderbufferImageANGLE_pixels(const State &glState,
                                              GLenum type,
                                              void *pixels,
                                              angle::ParamCapture *paramCapture);
+void CaptureGetTexLevelParameterivANGLE_params(const State &glState,
+                                               bool isCallValid,
+                                               TextureTarget targetPacked,
+                                               GLint level,
+                                               GLenum pname,
+                                               GLint *params,
+                                               angle::ParamCapture *paramCapture);
+void CaptureGetTexLevelParameterfvANGLE_params(const State &glState,
+                                               bool isCallValid,
+                                               TextureTarget targetPacked,
+                                               GLint level,
+                                               GLenum pname,
+                                               GLfloat *params,
+                                               angle::ParamCapture *paramCapture);
 void CaptureDrawElementsInstancedANGLE_indices(const State &glState,
                                                bool isCallValid,
                                                PrimitiveMode modePacked,
@@ -3063,20 +3517,6 @@ void CaptureGetQueryObjectui64vRobustANGLE_params(const State &glState,
                                                   GLsizei *length,
                                                   GLuint64 *params,
                                                   angle::ParamCapture *paramCapture);
-void CaptureGetTexLevelParameterivANGLE_params(const State &glState,
-                                               bool isCallValid,
-                                               TextureTarget targetPacked,
-                                               GLint level,
-                                               GLenum pname,
-                                               GLint *params,
-                                               angle::ParamCapture *paramCapture);
-void CaptureGetTexLevelParameterfvANGLE_params(const State &glState,
-                                               bool isCallValid,
-                                               TextureTarget targetPacked,
-                                               GLint level,
-                                               GLenum pname,
-                                               GLfloat *params,
-                                               angle::ParamCapture *paramCapture);
 void CaptureGetMultisamplefvANGLE_val(const State &glState,
                                       bool isCallValid,
                                       GLenum pname,
@@ -3127,6 +3567,36 @@ void CaptureGetProgramResourceLocationIndexEXT_name(const State &glState,
                                                     GLenum programInterface,
                                                     const GLchar *name,
                                                     angle::ParamCapture *paramCapture);
+void CaptureBufferStorageEXT_data(const State &glState,
+                                  bool isCallValid,
+                                  BufferBinding targetPacked,
+                                  GLsizeiptr size,
+                                  const void *data,
+                                  GLbitfield flags,
+                                  angle::ParamCapture *paramCapture);
+void CaptureGetObjectLabelEXT_length(const State &glState,
+                                     bool isCallValid,
+                                     GLenum type,
+                                     GLuint object,
+                                     GLsizei bufSize,
+                                     GLsizei *length,
+                                     GLchar *label,
+                                     angle::ParamCapture *paramCapture);
+void CaptureGetObjectLabelEXT_label(const State &glState,
+                                    bool isCallValid,
+                                    GLenum type,
+                                    GLuint object,
+                                    GLsizei bufSize,
+                                    GLsizei *length,
+                                    GLchar *label,
+                                    angle::ParamCapture *paramCapture);
+void CaptureLabelObjectEXT_label(const State &glState,
+                                 bool isCallValid,
+                                 GLenum type,
+                                 GLuint object,
+                                 GLsizei length,
+                                 const GLchar *label,
+                                 angle::ParamCapture *paramCapture);
 void CaptureInsertEventMarkerEXT_marker(const State &glState,
                                         bool isCallValid,
                                         GLsizei length,
@@ -3389,6 +3859,198 @@ void CaptureWaitSemaphoreEXT_srcLayouts(const State &glState,
                                         const TextureID *texturesPacked,
                                         const GLenum *srcLayouts,
                                         angle::ParamCapture *paramCapture);
+void CaptureCreateShaderProgramvEXT_strings(const State &glState,
+                                            bool isCallValid,
+                                            ShaderType typePacked,
+                                            GLsizei count,
+                                            const GLchar **strings,
+                                            angle::ParamCapture *paramCapture);
+void CaptureDeleteProgramPipelinesEXT_pipelinesPacked(const State &glState,
+                                                      bool isCallValid,
+                                                      GLsizei n,
+                                                      const ProgramPipelineID *pipelinesPacked,
+                                                      angle::ParamCapture *paramCapture);
+void CaptureGenProgramPipelinesEXT_pipelinesPacked(const State &glState,
+                                                   bool isCallValid,
+                                                   GLsizei n,
+                                                   ProgramPipelineID *pipelinesPacked,
+                                                   angle::ParamCapture *paramCapture);
+void CaptureGetProgramPipelineInfoLogEXT_length(const State &glState,
+                                                bool isCallValid,
+                                                ProgramPipelineID pipelinePacked,
+                                                GLsizei bufSize,
+                                                GLsizei *length,
+                                                GLchar *infoLog,
+                                                angle::ParamCapture *paramCapture);
+void CaptureGetProgramPipelineInfoLogEXT_infoLog(const State &glState,
+                                                 bool isCallValid,
+                                                 ProgramPipelineID pipelinePacked,
+                                                 GLsizei bufSize,
+                                                 GLsizei *length,
+                                                 GLchar *infoLog,
+                                                 angle::ParamCapture *paramCapture);
+void CaptureGetProgramPipelineivEXT_params(const State &glState,
+                                           bool isCallValid,
+                                           ProgramPipelineID pipelinePacked,
+                                           GLenum pname,
+                                           GLint *params,
+                                           angle::ParamCapture *paramCapture);
+void CaptureProgramUniform1fvEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLfloat *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform1ivEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLint *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform1uivEXT_value(const State &glState,
+                                        bool isCallValid,
+                                        ShaderProgramID programPacked,
+                                        UniformLocation locationPacked,
+                                        GLsizei count,
+                                        const GLuint *value,
+                                        angle::ParamCapture *paramCapture);
+void CaptureProgramUniform2fvEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLfloat *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform2ivEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLint *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform2uivEXT_value(const State &glState,
+                                        bool isCallValid,
+                                        ShaderProgramID programPacked,
+                                        UniformLocation locationPacked,
+                                        GLsizei count,
+                                        const GLuint *value,
+                                        angle::ParamCapture *paramCapture);
+void CaptureProgramUniform3fvEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLfloat *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform3ivEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLint *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform3uivEXT_value(const State &glState,
+                                        bool isCallValid,
+                                        ShaderProgramID programPacked,
+                                        UniformLocation locationPacked,
+                                        GLsizei count,
+                                        const GLuint *value,
+                                        angle::ParamCapture *paramCapture);
+void CaptureProgramUniform4fvEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLfloat *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform4ivEXT_value(const State &glState,
+                                       bool isCallValid,
+                                       ShaderProgramID programPacked,
+                                       UniformLocation locationPacked,
+                                       GLsizei count,
+                                       const GLint *value,
+                                       angle::ParamCapture *paramCapture);
+void CaptureProgramUniform4uivEXT_value(const State &glState,
+                                        bool isCallValid,
+                                        ShaderProgramID programPacked,
+                                        UniformLocation locationPacked,
+                                        GLsizei count,
+                                        const GLuint *value,
+                                        angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix2fvEXT_value(const State &glState,
+                                             bool isCallValid,
+                                             ShaderProgramID programPacked,
+                                             UniformLocation locationPacked,
+                                             GLsizei count,
+                                             GLboolean transpose,
+                                             const GLfloat *value,
+                                             angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix2x3fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix2x4fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix3fvEXT_value(const State &glState,
+                                             bool isCallValid,
+                                             ShaderProgramID programPacked,
+                                             UniformLocation locationPacked,
+                                             GLsizei count,
+                                             GLboolean transpose,
+                                             const GLfloat *value,
+                                             angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix3x2fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix3x4fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix4fvEXT_value(const State &glState,
+                                             bool isCallValid,
+                                             ShaderProgramID programPacked,
+                                             UniformLocation locationPacked,
+                                             GLsizei count,
+                                             GLboolean transpose,
+                                             const GLfloat *value,
+                                             angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix4x2fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
+void CaptureProgramUniformMatrix4x3fvEXT_value(const State &glState,
+                                               bool isCallValid,
+                                               ShaderProgramID programPacked,
+                                               UniformLocation locationPacked,
+                                               GLsizei count,
+                                               GLboolean transpose,
+                                               const GLfloat *value,
+                                               angle::ParamCapture *paramCapture);
 void CaptureDebugMessageCallbackKHR_userParam(const State &glState,
                                               bool isCallValid,
                                               GLDEBUGPROCKHR callback,
@@ -3854,4 +4516,4 @@ void CaptureGenVertexArraysOES_arraysPacked(const State &glState,
                                             angle::ParamCapture *paramCapture);
 }  // namespace gl
 
-#endif  // LIBANGLE_CAPTURE_GLES_ext_AUTOGEN_H_
+#endif  // LIBANGLE_CAPTURE_GLES_EXT_AUTOGEN_H_

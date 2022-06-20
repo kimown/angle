@@ -22,6 +22,7 @@
 
 #include "common/Optional.h"
 #include "common/angleutils.h"
+#include "libANGLE/Caps.h"
 #include "libANGLE/Compiler.h"
 #include "libANGLE/Debug.h"
 #include "libANGLE/angletypes.h"
@@ -44,7 +45,6 @@ namespace gl
 {
 class CompileTask;
 class Context;
-struct Limitations;
 class ShaderProgramManager;
 class State;
 
@@ -85,9 +85,30 @@ class ShaderState final : angle::NonCopyable
         return mActiveOutputVariables;
     }
 
-    bool isEarlyFragmentTeststOptimization() const { return mEarlyFragmentTestsOptimization; }
-
     bool compilePending() const { return mCompileStatus == CompileStatus::COMPILE_REQUESTED; }
+
+    const sh::WorkGroupSize &getLocalSize() const { return mLocalSize; }
+
+    bool getEarlyFragmentTestsOptimization() const { return mEarlyFragmentTestsOptimization; }
+    rx::SpecConstUsageBits getSpecConstUsageBits() const { return mSpecConstUsageBits; }
+
+    int getNumViews() const { return mNumViews; }
+
+    Optional<PrimitiveMode> getGeometryShaderInputPrimitiveType() const
+    {
+        return mGeometryShaderInputPrimitiveType;
+    }
+
+    Optional<PrimitiveMode> getGeometryShaderOutputPrimitiveType() const
+    {
+        return mGeometryShaderOutputPrimitiveType;
+    }
+
+    Optional<GLint> geoGeometryShaderMaxVertices() const { return mGeometryShaderMaxVertices; }
+
+    Optional<GLint> getGeometryShaderInvocations() const { return mGeometryShaderInvocations; }
+
+    CompileStatus getCompileStatus() const { return mCompileStatus; }
 
   private:
     friend class Shader;
@@ -111,6 +132,7 @@ class ShaderState final : angle::NonCopyable
     std::vector<sh::ShaderVariable> mActiveOutputVariables;
 
     bool mEarlyFragmentTestsOptimization;
+    rx::SpecConstUsageBits mSpecConstUsageBits;
 
     // ANGLE_multiview.
     int mNumViews;
@@ -170,6 +192,7 @@ class Shader final : angle::NonCopyable, public LabeledObject
     {
         return mState.mEarlyFragmentTestsOptimization;
     }
+    rx::SpecConstUsageBits getSpecConstUsageBits() const { return mState.mSpecConstUsageBits; }
 
     int getShaderVersion();
 
@@ -198,6 +221,16 @@ class Shader final : angle::NonCopyable, public LabeledObject
 
     const std::string &getCompilerResourcesString() const;
 
+    const ShaderState &getState() const { return mState; }
+
+    GLuint getCurrentMaxComputeWorkGroupInvocations() const
+    {
+        return mCurrentMaxComputeWorkGroupInvocations;
+    }
+
+    unsigned int getMaxComputeSharedMemory() const { return mMaxComputeSharedMemory; }
+    bool hasBeenDeleted() const { return mDeleteStatus; }
+
   private:
     struct CompilingState;
 
@@ -211,7 +244,7 @@ class Shader final : angle::NonCopyable, public LabeledObject
 
     ShaderState mState;
     std::unique_ptr<rx::ShaderImpl> mImplementation;
-    const gl::Limitations &mRendererLimitations;
+    const gl::Limitations mRendererLimitations;
     const ShaderProgramID mHandle;
     const ShaderType mType;
     unsigned int mRefCount;  // Number of program objects this shader is attached to

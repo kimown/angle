@@ -16,9 +16,36 @@
 #define LIBANGLE_RENDERER_METAL_TRANSLATORMETAL_H_
 
 #include "compiler/translator/TranslatorVulkan.h"
+#include "compiler/translator/tree_util/DriverUniform.h"
+#include "compiler/translator/tree_util/SpecializationConstant.h"
 
 namespace sh
 {
+
+// TODO: http://anglebug.com/5339 Implement it using actual specialization constant. For now we are
+// redirecting to driver uniforms
+class SpecConstMetal : public SpecConst
+{
+  public:
+    SpecConstMetal(TSymbolTable *symbolTable, ShCompileOptions compileOptions)
+        : SpecConst(symbolTable, compileOptions)
+    {}
+    ~SpecConstMetal() override {}
+
+  private:
+};
+
+class DriverUniformMetal : public DriverUniform
+{
+  public:
+    DriverUniformMetal() : DriverUniform() {}
+    ~DriverUniformMetal() override {}
+
+    TIntermBinary *getCoverageMaskFieldRef() const;
+
+  protected:
+    TFieldList *createUniformFields(TSymbolTable *symbolTable) const override;
+};
 
 class TranslatorMetal : public TranslatorVulkan
 {
@@ -30,8 +57,13 @@ class TranslatorMetal : public TranslatorVulkan
                                     ShCompileOptions compileOptions,
                                     PerformanceDiagnostics *perfDiagnostics) override;
 
-    ANGLE_NO_DISCARD bool transformDepthBeforeCorrection(TIntermBlock *root,
-                                                         const TVariable *driverUniforms) override;
+    ANGLE_NO_DISCARD bool transformDepthBeforeCorrection(
+        TIntermBlock *root,
+        const DriverUniform *driverUniforms) override;
+
+    ANGLE_NO_DISCARD bool insertSampleMaskWritingLogic(TIntermBlock *root,
+                                                       const DriverUniformMetal *driverUniforms);
+    ANGLE_NO_DISCARD bool insertRasterizerDiscardLogic(TIntermBlock *root);
 };
 
 }  // namespace sh

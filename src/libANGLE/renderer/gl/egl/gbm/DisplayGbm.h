@@ -30,21 +30,9 @@ namespace rx
 class FramebufferGL;
 class RendererEGL;
 
-// TODO(fjhenigman) Implement swap control.  The following struct will be used for that.
-// State-tracking data for the swap control to allow DisplayGbm to remember per
-// drawable information for swap control.
-struct SwapControlData final
-{
-    SwapControlData();
+struct SwapControlData;
 
-    // Set by the drawable
-    int targetSwapInterval;
-
-    // DisplayGbm-side state-tracking
-    int maxSwapInterval;
-    int currentSwapInterval;
-};
-
+// TODO(fjhenigman) Implement swap control.  The SwapControlData struct will be used for that.
 class DisplayGbm final : public DisplayEGL
 {
   public:
@@ -127,7 +115,8 @@ class DisplayGbm final : public DisplayEGL
                                const gl::Context *shareContext,
                                const egl::AttributeMap &attribs) override;
 
-    egl::Error makeCurrent(egl::Surface *drawSurface,
+    egl::Error makeCurrent(egl::Display *display,
+                           egl::Surface *drawSurface,
                            egl::Surface *readSurface,
                            gl::Context *context) override;
 
@@ -160,6 +149,7 @@ class DisplayGbm final : public DisplayEGL
                                 unsigned int tv_usec,
                                 void *data);
     void pageFlipHandler(unsigned int sequence, uint64_t tv);
+    bool validateEglConfig(const EGLint *configAttribs);
 
     gbm_device *mGBM;
     drmModeConnectorPtr mConnector;

@@ -5,7 +5,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //
-// libGLESv2.cpp: Implements the exported OpenGL ES functions.
+// libGLESv2_autogen.cpp: Implements the exported OpenGL ES functions.
 
 #include "angle_gl.h"
 
@@ -2843,6 +2843,23 @@ void GL_APIENTRY glGetRenderbufferImageANGLE(GLenum target,
     return gl::GetRenderbufferImageANGLE(target, format, type, pixels);
 }
 
+// GL_ANGLE_get_tex_level_parameter
+void GL_APIENTRY glGetTexLevelParameterivANGLE(GLenum target,
+                                               GLint level,
+                                               GLenum pname,
+                                               GLint *params)
+{
+    return gl::GetTexLevelParameterivANGLE(target, level, pname, params);
+}
+
+void GL_APIENTRY glGetTexLevelParameterfvANGLE(GLenum target,
+                                               GLint level,
+                                               GLenum pname,
+                                               GLfloat *params)
+{
+    return gl::GetTexLevelParameterfvANGLE(target, level, pname, params);
+}
+
 // GL_ANGLE_instanced_arrays
 void GL_APIENTRY glDrawArraysInstancedANGLE(GLenum mode,
                                             GLint first,
@@ -2864,6 +2881,69 @@ void GL_APIENTRY glDrawElementsInstancedANGLE(GLenum mode,
 void GL_APIENTRY glVertexAttribDivisorANGLE(GLuint index, GLuint divisor)
 {
     return gl::VertexAttribDivisorANGLE(index, divisor);
+}
+
+// GL_ANGLE_memory_object_flags
+void GL_APIENTRY glTexStorageMemFlags2DANGLE(GLenum target,
+                                             GLsizei levels,
+                                             GLenum internalFormat,
+                                             GLsizei width,
+                                             GLsizei height,
+                                             GLuint memory,
+                                             GLuint64 offset,
+                                             GLbitfield createFlags,
+                                             GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags2DANGLE(target, levels, internalFormat, width, height, memory,
+                                         offset, createFlags, usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags2DMultisampleANGLE(GLenum target,
+                                                        GLsizei samples,
+                                                        GLenum internalFormat,
+                                                        GLsizei width,
+                                                        GLsizei height,
+                                                        GLboolean fixedSampleLocations,
+                                                        GLuint memory,
+                                                        GLuint64 offset,
+                                                        GLbitfield createFlags,
+                                                        GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags2DMultisampleANGLE(target, samples, internalFormat, width, height,
+                                                    fixedSampleLocations, memory, offset,
+                                                    createFlags, usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags3DANGLE(GLenum target,
+                                             GLsizei levels,
+                                             GLenum internalFormat,
+                                             GLsizei width,
+                                             GLsizei height,
+                                             GLsizei depth,
+                                             GLuint memory,
+                                             GLuint64 offset,
+                                             GLbitfield createFlags,
+                                             GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags3DANGLE(target, levels, internalFormat, width, height, depth,
+                                         memory, offset, createFlags, usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags3DMultisampleANGLE(GLenum target,
+                                                        GLsizei samples,
+                                                        GLenum internalFormat,
+                                                        GLsizei width,
+                                                        GLsizei height,
+                                                        GLsizei depth,
+                                                        GLboolean fixedSampleLocations,
+                                                        GLuint memory,
+                                                        GLuint64 offset,
+                                                        GLbitfield createFlags,
+                                                        GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags3DMultisampleANGLE(target, samples, internalFormat, width, height,
+                                                    depth, fixedSampleLocations, memory, offset,
+                                                    createFlags, usageFlags);
 }
 
 // GL_ANGLE_memory_object_fuchsia
@@ -3611,22 +3691,6 @@ void GL_APIENTRY glTexStorage2DMultisampleANGLE(GLenum target,
                                             fixedsamplelocations);
 }
 
-void GL_APIENTRY glGetTexLevelParameterivANGLE(GLenum target,
-                                               GLint level,
-                                               GLenum pname,
-                                               GLint *params)
-{
-    return gl::GetTexLevelParameterivANGLE(target, level, pname, params);
-}
-
-void GL_APIENTRY glGetTexLevelParameterfvANGLE(GLenum target,
-                                               GLint level,
-                                               GLenum pname,
-                                               GLfloat *params)
-{
-    return gl::GetTexLevelParameterfvANGLE(target, level, pname, params);
-}
-
 void GL_APIENTRY glGetMultisamplefvANGLE(GLenum pname, GLuint index, GLfloat *val)
 {
     return gl::GetMultisamplefvANGLE(pname, index, val);
@@ -3709,6 +3773,8 @@ void GL_APIENTRY glLoseContextCHROMIUM(GLenum current, GLenum other)
 
 // GL_EXT_EGL_image_array
 
+// GL_EXT_YUV_target
+
 // GL_EXT_blend_func_extended
 void GL_APIENTRY glBindFragDataLocationEXT(GLuint program, GLuint color, const GLchar *name)
 {
@@ -3733,6 +3799,49 @@ GLint GL_APIENTRY glGetProgramResourceLocationIndexEXT(GLuint program,
                                                        const GLchar *name)
 {
     return gl::GetProgramResourceLocationIndexEXT(program, programInterface, name);
+}
+
+// GL_EXT_buffer_storage
+void GL_APIENTRY glBufferStorageEXT(GLenum target,
+                                    GLsizeiptr size,
+                                    const void *data,
+                                    GLbitfield flags)
+{
+    return gl::BufferStorageEXT(target, size, data, flags);
+}
+
+// GL_EXT_copy_image
+void GL_APIENTRY glCopyImageSubDataEXT(GLuint srcName,
+                                       GLenum srcTarget,
+                                       GLint srcLevel,
+                                       GLint srcX,
+                                       GLint srcY,
+                                       GLint srcZ,
+                                       GLuint dstName,
+                                       GLenum dstTarget,
+                                       GLint dstLevel,
+                                       GLint dstX,
+                                       GLint dstY,
+                                       GLint dstZ,
+                                       GLsizei srcWidth,
+                                       GLsizei srcHeight,
+                                       GLsizei srcDepth)
+{
+    return gl::CopyImageSubDataEXT(srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName,
+                                   dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight,
+                                   srcDepth);
+}
+
+// GL_EXT_debug_label
+void GL_APIENTRY
+glGetObjectLabelEXT(GLenum type, GLuint object, GLsizei bufSize, GLsizei *length, GLchar *label)
+{
+    return gl::GetObjectLabelEXT(type, object, bufSize, length, label);
+}
+
+void GL_APIENTRY glLabelObjectEXT(GLenum type, GLuint object, GLsizei length, const GLchar *label)
+{
+    return gl::LabelObjectEXT(type, object, length, label);
 }
 
 // GL_EXT_debug_marker
@@ -3908,6 +4017,25 @@ void GL_APIENTRY glMultiDrawElementsBaseVertexEXT(GLenum mode,
                                                   const GLint *basevertex)
 {
     return gl::MultiDrawElementsBaseVertexEXT(mode, count, type, indices, primcount, basevertex);
+}
+
+// GL_EXT_external_buffer
+void GL_APIENTRY glBufferStorageExternalEXT(GLenum target,
+                                            GLintptr offset,
+                                            GLsizeiptr size,
+                                            GLeglClientBufferEXT clientBuffer,
+                                            GLbitfield flags)
+{
+    return gl::BufferStorageExternalEXT(target, offset, size, clientBuffer, flags);
+}
+
+void GL_APIENTRY glNamedBufferStorageExternalEXT(GLuint buffer,
+                                                 GLintptr offset,
+                                                 GLsizeiptr size,
+                                                 GLeglClientBufferEXT clientBuffer,
+                                                 GLbitfield flags)
+{
+    return gl::NamedBufferStorageExternalEXT(buffer, offset, size, clientBuffer, flags);
 }
 
 // GL_EXT_geometry_shader
@@ -4173,6 +4301,334 @@ void GL_APIENTRY glImportSemaphoreFdEXT(GLuint semaphore, GLenum handleType, GLi
     return gl::ImportSemaphoreFdEXT(semaphore, handleType, fd);
 }
 
+// GL_EXT_separate_shader_objects
+void GL_APIENTRY glActiveShaderProgramEXT(GLuint pipeline, GLuint program)
+{
+    return gl::ActiveShaderProgramEXT(pipeline, program);
+}
+
+void GL_APIENTRY glBindProgramPipelineEXT(GLuint pipeline)
+{
+    return gl::BindProgramPipelineEXT(pipeline);
+}
+
+GLuint GL_APIENTRY glCreateShaderProgramvEXT(GLenum type, GLsizei count, const GLchar **strings)
+{
+    return gl::CreateShaderProgramvEXT(type, count, strings);
+}
+
+void GL_APIENTRY glDeleteProgramPipelinesEXT(GLsizei n, const GLuint *pipelines)
+{
+    return gl::DeleteProgramPipelinesEXT(n, pipelines);
+}
+
+void GL_APIENTRY glGenProgramPipelinesEXT(GLsizei n, GLuint *pipelines)
+{
+    return gl::GenProgramPipelinesEXT(n, pipelines);
+}
+
+void GL_APIENTRY glGetProgramPipelineInfoLogEXT(GLuint pipeline,
+                                                GLsizei bufSize,
+                                                GLsizei *length,
+                                                GLchar *infoLog)
+{
+    return gl::GetProgramPipelineInfoLogEXT(pipeline, bufSize, length, infoLog);
+}
+
+void GL_APIENTRY glGetProgramPipelineivEXT(GLuint pipeline, GLenum pname, GLint *params)
+{
+    return gl::GetProgramPipelineivEXT(pipeline, pname, params);
+}
+
+GLboolean GL_APIENTRY glIsProgramPipelineEXT(GLuint pipeline)
+{
+    return gl::IsProgramPipelineEXT(pipeline);
+}
+
+void GL_APIENTRY glProgramParameteriEXT(GLuint program, GLenum pname, GLint value)
+{
+    return gl::ProgramParameteriEXT(program, pname, value);
+}
+
+void GL_APIENTRY glProgramUniform1fEXT(GLuint program, GLint location, GLfloat v0)
+{
+    return gl::ProgramUniform1fEXT(program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1fvEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLfloat *value)
+{
+    return gl::ProgramUniform1fvEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform1iEXT(GLuint program, GLint location, GLint v0)
+{
+    return gl::ProgramUniform1iEXT(program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1ivEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLint *value)
+{
+    return gl::ProgramUniform1ivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform1uiEXT(GLuint program, GLint location, GLuint v0)
+{
+    return gl::ProgramUniform1uiEXT(program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1uivEXT(GLuint program,
+                                         GLint location,
+                                         GLsizei count,
+                                         const GLuint *value)
+{
+    return gl::ProgramUniform1uivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform2fEXT(GLuint program, GLint location, GLfloat v0, GLfloat v1)
+{
+    return gl::ProgramUniform2fEXT(program, location, v0, v1);
+}
+
+void GL_APIENTRY glProgramUniform2fvEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLfloat *value)
+{
+    return gl::ProgramUniform2fvEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform2iEXT(GLuint program, GLint location, GLint v0, GLint v1)
+{
+    return gl::ProgramUniform2iEXT(program, location, v0, v1);
+}
+
+void GL_APIENTRY glProgramUniform2ivEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLint *value)
+{
+    return gl::ProgramUniform2ivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform2uiEXT(GLuint program, GLint location, GLuint v0, GLuint v1)
+{
+    return gl::ProgramUniform2uiEXT(program, location, v0, v1);
+}
+
+void GL_APIENTRY glProgramUniform2uivEXT(GLuint program,
+                                         GLint location,
+                                         GLsizei count,
+                                         const GLuint *value)
+{
+    return gl::ProgramUniform2uivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY
+glProgramUniform3fEXT(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+{
+    return gl::ProgramUniform3fEXT(program, location, v0, v1, v2);
+}
+
+void GL_APIENTRY glProgramUniform3fvEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLfloat *value)
+{
+    return gl::ProgramUniform3fvEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform3iEXT(GLuint program, GLint location, GLint v0, GLint v1, GLint v2)
+{
+    return gl::ProgramUniform3iEXT(program, location, v0, v1, v2);
+}
+
+void GL_APIENTRY glProgramUniform3ivEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLint *value)
+{
+    return gl::ProgramUniform3ivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY
+glProgramUniform3uiEXT(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2)
+{
+    return gl::ProgramUniform3uiEXT(program, location, v0, v1, v2);
+}
+
+void GL_APIENTRY glProgramUniform3uivEXT(GLuint program,
+                                         GLint location,
+                                         GLsizei count,
+                                         const GLuint *value)
+{
+    return gl::ProgramUniform3uivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform4fEXT(GLuint program,
+                                       GLint location,
+                                       GLfloat v0,
+                                       GLfloat v1,
+                                       GLfloat v2,
+                                       GLfloat v3)
+{
+    return gl::ProgramUniform4fEXT(program, location, v0, v1, v2, v3);
+}
+
+void GL_APIENTRY glProgramUniform4fvEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLfloat *value)
+{
+    return gl::ProgramUniform4fvEXT(program, location, count, value);
+}
+
+void GL_APIENTRY
+glProgramUniform4iEXT(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
+{
+    return gl::ProgramUniform4iEXT(program, location, v0, v1, v2, v3);
+}
+
+void GL_APIENTRY glProgramUniform4ivEXT(GLuint program,
+                                        GLint location,
+                                        GLsizei count,
+                                        const GLint *value)
+{
+    return gl::ProgramUniform4ivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY
+glProgramUniform4uiEXT(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{
+    return gl::ProgramUniform4uiEXT(program, location, v0, v1, v2, v3);
+}
+
+void GL_APIENTRY glProgramUniform4uivEXT(GLuint program,
+                                         GLint location,
+                                         GLsizei count,
+                                         const GLuint *value)
+{
+    return gl::ProgramUniform4uivEXT(program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix2fvEXT(GLuint program,
+                                              GLint location,
+                                              GLsizei count,
+                                              GLboolean transpose,
+                                              const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix2x3fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2x3fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix2x4fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2x4fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix3fvEXT(GLuint program,
+                                              GLint location,
+                                              GLsizei count,
+                                              GLboolean transpose,
+                                              const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix3x2fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3x2fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix3x4fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3x4fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix4fvEXT(GLuint program,
+                                              GLint location,
+                                              GLsizei count,
+                                              GLboolean transpose,
+                                              const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix4x2fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4x2fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix4x3fvEXT(GLuint program,
+                                                GLint location,
+                                                GLsizei count,
+                                                GLboolean transpose,
+                                                const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4x3fvEXT(program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glUseProgramStagesEXT(GLuint pipeline, GLbitfield stages, GLuint program)
+{
+    return gl::UseProgramStagesEXT(pipeline, stages, program);
+}
+
+void GL_APIENTRY glValidateProgramPipelineEXT(GLuint pipeline)
+{
+    return gl::ValidateProgramPipelineEXT(pipeline);
+}
+
+// GL_EXT_shader_io_blocks
+
+// GL_EXT_tessellation_shader
+void GL_APIENTRY glPatchParameteriEXT(GLenum pname, GLint value)
+{
+    return gl::PatchParameteriEXT(pname, value);
+}
+
+// GL_EXT_texture_buffer
+void GL_APIENTRY glTexBufferEXT(GLenum target, GLenum internalformat, GLuint buffer)
+{
+    return gl::TexBufferEXT(target, internalformat, buffer);
+}
+
+void GL_APIENTRY glTexBufferRangeEXT(GLenum target,
+                                     GLenum internalformat,
+                                     GLuint buffer,
+                                     GLintptr offset,
+                                     GLsizeiptr size)
+{
+    return gl::TexBufferRangeEXT(target, internalformat, buffer, offset, size);
+}
+
 // GL_EXT_texture_compression_bptc
 
 // GL_EXT_texture_compression_dxt1
@@ -4357,6 +4813,28 @@ void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image
 }
 
 // GL_OES_compressed_ETC1_RGB8_texture
+
+// GL_OES_copy_image
+void GL_APIENTRY glCopyImageSubDataOES(GLuint srcName,
+                                       GLenum srcTarget,
+                                       GLint srcLevel,
+                                       GLint srcX,
+                                       GLint srcY,
+                                       GLint srcZ,
+                                       GLuint dstName,
+                                       GLenum dstTarget,
+                                       GLint dstLevel,
+                                       GLint dstX,
+                                       GLint dstY,
+                                       GLint dstZ,
+                                       GLsizei srcWidth,
+                                       GLsizei srcHeight,
+                                       GLsizei srcDepth)
+{
+    return gl::CopyImageSubDataOES(srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName,
+                                   dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight,
+                                   srcDepth);
+}
 
 // GL_OES_depth32
 
@@ -4634,6 +5112,14 @@ GLbitfield GL_APIENTRY glQueryMatrixxOES(GLfixed *mantissa, GLint *exponent)
     return gl::QueryMatrixxOES(mantissa, exponent);
 }
 
+// GL_OES_sample_shading
+void GL_APIENTRY glMinSampleShadingOES(GLfloat value)
+{
+    return gl::MinSampleShadingOES(value);
+}
+
+// GL_OES_shader_io_blocks
+
 // GL_OES_texture_3D
 void GL_APIENTRY glCompressedTexImage3DOES(GLenum target,
                                            GLint level,
@@ -4760,6 +5246,21 @@ void GL_APIENTRY glTexParameterIuivOES(GLenum target, GLenum pname, const GLuint
     return gl::TexParameterIuivOES(target, pname, params);
 }
 
+// GL_OES_texture_buffer
+void GL_APIENTRY glTexBufferOES(GLenum target, GLenum internalformat, GLuint buffer)
+{
+    return gl::TexBufferOES(target, internalformat, buffer);
+}
+
+void GL_APIENTRY glTexBufferRangeOES(GLenum target,
+                                     GLenum internalformat,
+                                     GLuint buffer,
+                                     GLintptr offset,
+                                     GLsizeiptr size)
+{
+    return gl::TexBufferRangeOES(target, internalformat, buffer, offset, size);
+}
+
 // GL_OES_texture_cube_map
 void GL_APIENTRY glGetTexGenfvOES(GLenum coord, GLenum pname, GLfloat *params)
 {
@@ -4809,6 +5310,8 @@ void GL_APIENTRY glTexGenxvOES(GLenum coord, GLenum pname, const GLfixed *params
 // GL_OES_texture_cube_map_array
 
 // GL_OES_texture_half_float
+
+// GL_OES_texture_stencil8
 
 // GL_OES_texture_storage_multisample_2d_array
 void GL_APIENTRY glTexStorage3DMultisampleOES(GLenum target,
@@ -4864,6 +5367,13 @@ void GL_APIENTRY glActiveShaderProgramContextANGLE(GLeglContext ctx,
                                                    GLuint program)
 {
     return gl::ActiveShaderProgramContextANGLE(ctx, pipeline, program);
+}
+
+void GL_APIENTRY glActiveShaderProgramEXTContextANGLE(GLeglContext ctx,
+                                                      GLuint pipeline,
+                                                      GLuint program)
+{
+    return gl::ActiveShaderProgramEXTContextANGLE(ctx, pipeline, program);
 }
 
 void GL_APIENTRY glActiveTextureContextANGLE(GLeglContext ctx, GLenum texture)
@@ -4977,6 +5487,11 @@ void GL_APIENTRY glBindImageTextureContextANGLE(GLeglContext ctx,
 void GL_APIENTRY glBindProgramPipelineContextANGLE(GLeglContext ctx, GLuint pipeline)
 {
     return gl::BindProgramPipelineContextANGLE(ctx, pipeline);
+}
+
+void GL_APIENTRY glBindProgramPipelineEXTContextANGLE(GLeglContext ctx, GLuint pipeline)
+{
+    return gl::BindProgramPipelineEXTContextANGLE(ctx, pipeline);
 }
 
 void GL_APIENTRY glBindRenderbufferContextANGLE(GLeglContext ctx,
@@ -5188,6 +5703,25 @@ void GL_APIENTRY glBufferDataContextANGLE(GLeglContext ctx,
                                           GLenum usage)
 {
     return gl::BufferDataContextANGLE(ctx, target, size, data, usage);
+}
+
+void GL_APIENTRY glBufferStorageEXTContextANGLE(GLeglContext ctx,
+                                                GLenum target,
+                                                GLsizeiptr size,
+                                                const void *data,
+                                                GLbitfield flags)
+{
+    return gl::BufferStorageEXTContextANGLE(ctx, target, size, data, flags);
+}
+
+void GL_APIENTRY glBufferStorageExternalEXTContextANGLE(GLeglContext ctx,
+                                                        GLenum target,
+                                                        GLintptr offset,
+                                                        GLsizeiptr size,
+                                                        GLeglClientBufferEXT clientBuffer,
+                                                        GLbitfield flags)
+{
+    return gl::BufferStorageExternalEXTContextANGLE(ctx, target, offset, size, clientBuffer, flags);
 }
 
 void GL_APIENTRY glBufferStorageMemEXTContextANGLE(GLeglContext ctx,
@@ -5504,6 +6038,50 @@ void GL_APIENTRY glCopyImageSubDataContextANGLE(GLeglContext ctx,
                                             srcWidth, srcHeight, srcDepth);
 }
 
+void GL_APIENTRY glCopyImageSubDataEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint srcName,
+                                                   GLenum srcTarget,
+                                                   GLint srcLevel,
+                                                   GLint srcX,
+                                                   GLint srcY,
+                                                   GLint srcZ,
+                                                   GLuint dstName,
+                                                   GLenum dstTarget,
+                                                   GLint dstLevel,
+                                                   GLint dstX,
+                                                   GLint dstY,
+                                                   GLint dstZ,
+                                                   GLsizei srcWidth,
+                                                   GLsizei srcHeight,
+                                                   GLsizei srcDepth)
+{
+    return gl::CopyImageSubDataEXTContextANGLE(ctx, srcName, srcTarget, srcLevel, srcX, srcY, srcZ,
+                                               dstName, dstTarget, dstLevel, dstX, dstY, dstZ,
+                                               srcWidth, srcHeight, srcDepth);
+}
+
+void GL_APIENTRY glCopyImageSubDataOESContextANGLE(GLeglContext ctx,
+                                                   GLuint srcName,
+                                                   GLenum srcTarget,
+                                                   GLint srcLevel,
+                                                   GLint srcX,
+                                                   GLint srcY,
+                                                   GLint srcZ,
+                                                   GLuint dstName,
+                                                   GLenum dstTarget,
+                                                   GLint dstLevel,
+                                                   GLint dstX,
+                                                   GLint dstY,
+                                                   GLint dstZ,
+                                                   GLsizei srcWidth,
+                                                   GLsizei srcHeight,
+                                                   GLsizei srcDepth)
+{
+    return gl::CopyImageSubDataOESContextANGLE(ctx, srcName, srcTarget, srcLevel, srcX, srcY, srcZ,
+                                               dstName, dstTarget, dstLevel, dstX, dstY, dstZ,
+                                               srcWidth, srcHeight, srcDepth);
+}
+
 void GL_APIENTRY glCopyTexImage2DContextANGLE(GLeglContext ctx,
                                               GLenum target,
                                               GLint level,
@@ -5585,6 +6163,14 @@ GLuint GL_APIENTRY glCreateShaderProgramvContextANGLE(GLeglContext ctx,
                                                       const GLchar *const *strings)
 {
     return gl::CreateShaderProgramvContextANGLE(ctx, type, count, strings);
+}
+
+GLuint GL_APIENTRY glCreateShaderProgramvEXTContextANGLE(GLeglContext ctx,
+                                                         GLenum type,
+                                                         GLsizei count,
+                                                         const GLchar **strings)
+{
+    return gl::CreateShaderProgramvEXTContextANGLE(ctx, type, count, strings);
 }
 
 void GL_APIENTRY glCullFaceContextANGLE(GLeglContext ctx, GLenum mode)
@@ -5696,6 +6282,13 @@ void GL_APIENTRY glDeleteProgramPipelinesContextANGLE(GLeglContext ctx,
                                                       const GLuint *pipelines)
 {
     return gl::DeleteProgramPipelinesContextANGLE(ctx, n, pipelines);
+}
+
+void GL_APIENTRY glDeleteProgramPipelinesEXTContextANGLE(GLeglContext ctx,
+                                                         GLsizei n,
+                                                         const GLuint *pipelines)
+{
+    return gl::DeleteProgramPipelinesEXTContextANGLE(ctx, n, pipelines);
 }
 
 void GL_APIENTRY glDeleteQueriesContextANGLE(GLeglContext ctx, GLsizei n, const GLuint *ids)
@@ -6394,6 +6987,13 @@ void GL_APIENTRY glGenProgramPipelinesContextANGLE(GLeglContext ctx, GLsizei n, 
     return gl::GenProgramPipelinesContextANGLE(ctx, n, pipelines);
 }
 
+void GL_APIENTRY glGenProgramPipelinesEXTContextANGLE(GLeglContext ctx,
+                                                      GLsizei n,
+                                                      GLuint *pipelines)
+{
+    return gl::GenProgramPipelinesEXTContextANGLE(ctx, n, pipelines);
+}
+
 void GL_APIENTRY glGenQueriesContextANGLE(GLeglContext ctx, GLsizei n, GLuint *ids)
 {
     return gl::GenQueriesContextANGLE(ctx, n, ids);
@@ -6784,6 +7384,16 @@ void GL_APIENTRY glGetObjectLabelContextANGLE(GLeglContext ctx,
     return gl::GetObjectLabelContextANGLE(ctx, identifier, name, bufSize, length, label);
 }
 
+void GL_APIENTRY glGetObjectLabelEXTContextANGLE(GLeglContext ctx,
+                                                 GLenum type,
+                                                 GLuint object,
+                                                 GLsizei bufSize,
+                                                 GLsizei *length,
+                                                 GLchar *label)
+{
+    return gl::GetObjectLabelEXTContextANGLE(ctx, type, object, bufSize, length, label);
+}
+
 void GL_APIENTRY glGetObjectLabelKHRContextANGLE(GLeglContext ctx,
                                                  GLenum identifier,
                                                  GLuint name,
@@ -6869,12 +7479,29 @@ void GL_APIENTRY glGetProgramPipelineInfoLogContextANGLE(GLeglContext ctx,
     return gl::GetProgramPipelineInfoLogContextANGLE(ctx, pipeline, bufSize, length, infoLog);
 }
 
+void GL_APIENTRY glGetProgramPipelineInfoLogEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint pipeline,
+                                                            GLsizei bufSize,
+                                                            GLsizei *length,
+                                                            GLchar *infoLog)
+{
+    return gl::GetProgramPipelineInfoLogEXTContextANGLE(ctx, pipeline, bufSize, length, infoLog);
+}
+
 void GL_APIENTRY glGetProgramPipelineivContextANGLE(GLeglContext ctx,
                                                     GLuint pipeline,
                                                     GLenum pname,
                                                     GLint *params)
 {
     return gl::GetProgramPipelineivContextANGLE(ctx, pipeline, pname, params);
+}
+
+void GL_APIENTRY glGetProgramPipelineivEXTContextANGLE(GLeglContext ctx,
+                                                       GLuint pipeline,
+                                                       GLenum pname,
+                                                       GLint *params)
+{
+    return gl::GetProgramPipelineivEXTContextANGLE(ctx, pipeline, pname, params);
 }
 
 GLuint GL_APIENTRY glGetProgramResourceIndexContextANGLE(GLeglContext ctx,
@@ -7514,6 +8141,11 @@ GLboolean GL_APIENTRY glIsProgramPipelineContextANGLE(GLeglContext ctx, GLuint p
     return gl::IsProgramPipelineContextANGLE(ctx, pipeline);
 }
 
+GLboolean GL_APIENTRY glIsProgramPipelineEXTContextANGLE(GLeglContext ctx, GLuint pipeline)
+{
+    return gl::IsProgramPipelineEXTContextANGLE(ctx, pipeline);
+}
+
 GLboolean GL_APIENTRY glIsQueryContextANGLE(GLeglContext ctx, GLuint id)
 {
     return gl::IsQueryContextANGLE(ctx, id);
@@ -7572,6 +8204,15 @@ GLboolean GL_APIENTRY glIsVertexArrayContextANGLE(GLeglContext ctx, GLuint array
 GLboolean GL_APIENTRY glIsVertexArrayOESContextANGLE(GLeglContext ctx, GLuint array)
 {
     return gl::IsVertexArrayOESContextANGLE(ctx, array);
+}
+
+void GL_APIENTRY glLabelObjectEXTContextANGLE(GLeglContext ctx,
+                                              GLenum type,
+                                              GLuint object,
+                                              GLsizei length,
+                                              const GLchar *label)
+{
+    return gl::LabelObjectEXTContextANGLE(ctx, type, object, length, label);
 }
 
 void GL_APIENTRY glLightModelfContextANGLE(GLeglContext ctx, GLenum pname, GLfloat param)
@@ -7751,6 +8392,11 @@ void GL_APIENTRY glMinSampleShadingContextANGLE(GLeglContext ctx, GLfloat value)
     return gl::MinSampleShadingContextANGLE(ctx, value);
 }
 
+void GL_APIENTRY glMinSampleShadingOESContextANGLE(GLeglContext ctx, GLfloat value)
+{
+    return gl::MinSampleShadingOESContextANGLE(ctx, value);
+}
+
 void GL_APIENTRY glMultMatrixfContextANGLE(GLeglContext ctx, const GLfloat *m)
 {
     return gl::MultMatrixfContextANGLE(ctx, m);
@@ -7791,6 +8437,17 @@ void GL_APIENTRY glMultiTexCoord4xContextANGLE(GLeglContext ctx,
                                                GLfixed q)
 {
     return gl::MultiTexCoord4xContextANGLE(ctx, texture, s, t, r, q);
+}
+
+void GL_APIENTRY glNamedBufferStorageExternalEXTContextANGLE(GLeglContext ctx,
+                                                             GLuint buffer,
+                                                             GLintptr offset,
+                                                             GLsizeiptr size,
+                                                             GLeglClientBufferEXT clientBuffer,
+                                                             GLbitfield flags)
+{
+    return gl::NamedBufferStorageExternalEXTContextANGLE(ctx, buffer, offset, size, clientBuffer,
+                                                         flags);
 }
 
 void GL_APIENTRY glNormal3fContextANGLE(GLeglContext ctx, GLfloat nx, GLfloat ny, GLfloat nz)
@@ -7870,6 +8527,11 @@ void GL_APIENTRY glOrthoxContextANGLE(GLeglContext ctx,
 void GL_APIENTRY glPatchParameteriContextANGLE(GLeglContext ctx, GLenum pname, GLint value)
 {
     return gl::PatchParameteriContextANGLE(ctx, pname, value);
+}
+
+void GL_APIENTRY glPatchParameteriEXTContextANGLE(GLeglContext ctx, GLenum pname, GLint value)
+{
+    return gl::PatchParameteriEXTContextANGLE(ctx, pname, value);
 }
 
 void GL_APIENTRY glPauseTransformFeedbackContextANGLE(GLeglContext ctx)
@@ -7994,12 +8656,28 @@ void GL_APIENTRY glProgramParameteriContextANGLE(GLeglContext ctx,
     return gl::ProgramParameteriContextANGLE(ctx, program, pname, value);
 }
 
+void GL_APIENTRY glProgramParameteriEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLenum pname,
+                                                    GLint value)
+{
+    return gl::ProgramParameteriEXTContextANGLE(ctx, program, pname, value);
+}
+
 void GL_APIENTRY glProgramUniform1fContextANGLE(GLeglContext ctx,
                                                 GLuint program,
                                                 GLint location,
                                                 GLfloat v0)
 {
     return gl::ProgramUniform1fContextANGLE(ctx, program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1fEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLfloat v0)
+{
+    return gl::ProgramUniform1fEXTContextANGLE(ctx, program, location, v0);
 }
 
 void GL_APIENTRY glProgramUniform1fvContextANGLE(GLeglContext ctx,
@@ -8011,12 +8689,29 @@ void GL_APIENTRY glProgramUniform1fvContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform1fvContextANGLE(ctx, program, location, count, value);
 }
 
+void GL_APIENTRY glProgramUniform1fvEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLfloat *value)
+{
+    return gl::ProgramUniform1fvEXTContextANGLE(ctx, program, location, count, value);
+}
+
 void GL_APIENTRY glProgramUniform1iContextANGLE(GLeglContext ctx,
                                                 GLuint program,
                                                 GLint location,
                                                 GLint v0)
 {
     return gl::ProgramUniform1iContextANGLE(ctx, program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1iEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLint v0)
+{
+    return gl::ProgramUniform1iEXTContextANGLE(ctx, program, location, v0);
 }
 
 void GL_APIENTRY glProgramUniform1ivContextANGLE(GLeglContext ctx,
@@ -8028,12 +8723,29 @@ void GL_APIENTRY glProgramUniform1ivContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform1ivContextANGLE(ctx, program, location, count, value);
 }
 
+void GL_APIENTRY glProgramUniform1ivEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLint *value)
+{
+    return gl::ProgramUniform1ivEXTContextANGLE(ctx, program, location, count, value);
+}
+
 void GL_APIENTRY glProgramUniform1uiContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
                                                  GLuint v0)
 {
     return gl::ProgramUniform1uiContextANGLE(ctx, program, location, v0);
+}
+
+void GL_APIENTRY glProgramUniform1uiEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLuint v0)
+{
+    return gl::ProgramUniform1uiEXTContextANGLE(ctx, program, location, v0);
 }
 
 void GL_APIENTRY glProgramUniform1uivContextANGLE(GLeglContext ctx,
@@ -8045,6 +8757,15 @@ void GL_APIENTRY glProgramUniform1uivContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform1uivContextANGLE(ctx, program, location, count, value);
 }
 
+void GL_APIENTRY glProgramUniform1uivEXTContextANGLE(GLeglContext ctx,
+                                                     GLuint program,
+                                                     GLint location,
+                                                     GLsizei count,
+                                                     const GLuint *value)
+{
+    return gl::ProgramUniform1uivEXTContextANGLE(ctx, program, location, count, value);
+}
+
 void GL_APIENTRY glProgramUniform2fContextANGLE(GLeglContext ctx,
                                                 GLuint program,
                                                 GLint location,
@@ -8052,6 +8773,15 @@ void GL_APIENTRY glProgramUniform2fContextANGLE(GLeglContext ctx,
                                                 GLfloat v1)
 {
     return gl::ProgramUniform2fContextANGLE(ctx, program, location, v0, v1);
+}
+
+void GL_APIENTRY glProgramUniform2fEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLfloat v0,
+                                                   GLfloat v1)
+{
+    return gl::ProgramUniform2fEXTContextANGLE(ctx, program, location, v0, v1);
 }
 
 void GL_APIENTRY glProgramUniform2fvContextANGLE(GLeglContext ctx,
@@ -8063,10 +8793,28 @@ void GL_APIENTRY glProgramUniform2fvContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform2fvContextANGLE(ctx, program, location, count, value);
 }
 
+void GL_APIENTRY glProgramUniform2fvEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLfloat *value)
+{
+    return gl::ProgramUniform2fvEXTContextANGLE(ctx, program, location, count, value);
+}
+
 void GL_APIENTRY
 glProgramUniform2iContextANGLE(GLeglContext ctx, GLuint program, GLint location, GLint v0, GLint v1)
 {
     return gl::ProgramUniform2iContextANGLE(ctx, program, location, v0, v1);
+}
+
+void GL_APIENTRY glProgramUniform2iEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLint v0,
+                                                   GLint v1)
+{
+    return gl::ProgramUniform2iEXTContextANGLE(ctx, program, location, v0, v1);
 }
 
 void GL_APIENTRY glProgramUniform2ivContextANGLE(GLeglContext ctx,
@@ -8078,6 +8826,15 @@ void GL_APIENTRY glProgramUniform2ivContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform2ivContextANGLE(ctx, program, location, count, value);
 }
 
+void GL_APIENTRY glProgramUniform2ivEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLint *value)
+{
+    return gl::ProgramUniform2ivEXTContextANGLE(ctx, program, location, count, value);
+}
+
 void GL_APIENTRY glProgramUniform2uiContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
@@ -8087,6 +8844,15 @@ void GL_APIENTRY glProgramUniform2uiContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform2uiContextANGLE(ctx, program, location, v0, v1);
 }
 
+void GL_APIENTRY glProgramUniform2uiEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLuint v0,
+                                                    GLuint v1)
+{
+    return gl::ProgramUniform2uiEXTContextANGLE(ctx, program, location, v0, v1);
+}
+
 void GL_APIENTRY glProgramUniform2uivContextANGLE(GLeglContext ctx,
                                                   GLuint program,
                                                   GLint location,
@@ -8094,6 +8860,15 @@ void GL_APIENTRY glProgramUniform2uivContextANGLE(GLeglContext ctx,
                                                   const GLuint *value)
 {
     return gl::ProgramUniform2uivContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform2uivEXTContextANGLE(GLeglContext ctx,
+                                                     GLuint program,
+                                                     GLint location,
+                                                     GLsizei count,
+                                                     const GLuint *value)
+{
+    return gl::ProgramUniform2uivEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform3fContextANGLE(GLeglContext ctx,
@@ -8106,6 +8881,16 @@ void GL_APIENTRY glProgramUniform3fContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform3fContextANGLE(ctx, program, location, v0, v1, v2);
 }
 
+void GL_APIENTRY glProgramUniform3fEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLfloat v0,
+                                                   GLfloat v1,
+                                                   GLfloat v2)
+{
+    return gl::ProgramUniform3fEXTContextANGLE(ctx, program, location, v0, v1, v2);
+}
+
 void GL_APIENTRY glProgramUniform3fvContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
@@ -8113,6 +8898,15 @@ void GL_APIENTRY glProgramUniform3fvContextANGLE(GLeglContext ctx,
                                                  const GLfloat *value)
 {
     return gl::ProgramUniform3fvContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform3fvEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLfloat *value)
+{
+    return gl::ProgramUniform3fvEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform3iContextANGLE(GLeglContext ctx,
@@ -8125,6 +8919,16 @@ void GL_APIENTRY glProgramUniform3iContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform3iContextANGLE(ctx, program, location, v0, v1, v2);
 }
 
+void GL_APIENTRY glProgramUniform3iEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLint v0,
+                                                   GLint v1,
+                                                   GLint v2)
+{
+    return gl::ProgramUniform3iEXTContextANGLE(ctx, program, location, v0, v1, v2);
+}
+
 void GL_APIENTRY glProgramUniform3ivContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
@@ -8132,6 +8936,15 @@ void GL_APIENTRY glProgramUniform3ivContextANGLE(GLeglContext ctx,
                                                  const GLint *value)
 {
     return gl::ProgramUniform3ivContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform3ivEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLint *value)
+{
+    return gl::ProgramUniform3ivEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform3uiContextANGLE(GLeglContext ctx,
@@ -8144,6 +8957,16 @@ void GL_APIENTRY glProgramUniform3uiContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform3uiContextANGLE(ctx, program, location, v0, v1, v2);
 }
 
+void GL_APIENTRY glProgramUniform3uiEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLuint v0,
+                                                    GLuint v1,
+                                                    GLuint v2)
+{
+    return gl::ProgramUniform3uiEXTContextANGLE(ctx, program, location, v0, v1, v2);
+}
+
 void GL_APIENTRY glProgramUniform3uivContextANGLE(GLeglContext ctx,
                                                   GLuint program,
                                                   GLint location,
@@ -8151,6 +8974,15 @@ void GL_APIENTRY glProgramUniform3uivContextANGLE(GLeglContext ctx,
                                                   const GLuint *value)
 {
     return gl::ProgramUniform3uivContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform3uivEXTContextANGLE(GLeglContext ctx,
+                                                     GLuint program,
+                                                     GLint location,
+                                                     GLsizei count,
+                                                     const GLuint *value)
+{
+    return gl::ProgramUniform3uivEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform4fContextANGLE(GLeglContext ctx,
@@ -8164,6 +8996,17 @@ void GL_APIENTRY glProgramUniform4fContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform4fContextANGLE(ctx, program, location, v0, v1, v2, v3);
 }
 
+void GL_APIENTRY glProgramUniform4fEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLfloat v0,
+                                                   GLfloat v1,
+                                                   GLfloat v2,
+                                                   GLfloat v3)
+{
+    return gl::ProgramUniform4fEXTContextANGLE(ctx, program, location, v0, v1, v2, v3);
+}
+
 void GL_APIENTRY glProgramUniform4fvContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
@@ -8171,6 +9014,15 @@ void GL_APIENTRY glProgramUniform4fvContextANGLE(GLeglContext ctx,
                                                  const GLfloat *value)
 {
     return gl::ProgramUniform4fvContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform4fvEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLfloat *value)
+{
+    return gl::ProgramUniform4fvEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform4iContextANGLE(GLeglContext ctx,
@@ -8184,6 +9036,17 @@ void GL_APIENTRY glProgramUniform4iContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform4iContextANGLE(ctx, program, location, v0, v1, v2, v3);
 }
 
+void GL_APIENTRY glProgramUniform4iEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint program,
+                                                   GLint location,
+                                                   GLint v0,
+                                                   GLint v1,
+                                                   GLint v2,
+                                                   GLint v3)
+{
+    return gl::ProgramUniform4iEXTContextANGLE(ctx, program, location, v0, v1, v2, v3);
+}
+
 void GL_APIENTRY glProgramUniform4ivContextANGLE(GLeglContext ctx,
                                                  GLuint program,
                                                  GLint location,
@@ -8191,6 +9054,15 @@ void GL_APIENTRY glProgramUniform4ivContextANGLE(GLeglContext ctx,
                                                  const GLint *value)
 {
     return gl::ProgramUniform4ivContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform4ivEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLsizei count,
+                                                    const GLint *value)
+{
+    return gl::ProgramUniform4ivEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniform4uiContextANGLE(GLeglContext ctx,
@@ -8204,6 +9076,17 @@ void GL_APIENTRY glProgramUniform4uiContextANGLE(GLeglContext ctx,
     return gl::ProgramUniform4uiContextANGLE(ctx, program, location, v0, v1, v2, v3);
 }
 
+void GL_APIENTRY glProgramUniform4uiEXTContextANGLE(GLeglContext ctx,
+                                                    GLuint program,
+                                                    GLint location,
+                                                    GLuint v0,
+                                                    GLuint v1,
+                                                    GLuint v2,
+                                                    GLuint v3)
+{
+    return gl::ProgramUniform4uiEXTContextANGLE(ctx, program, location, v0, v1, v2, v3);
+}
+
 void GL_APIENTRY glProgramUniform4uivContextANGLE(GLeglContext ctx,
                                                   GLuint program,
                                                   GLint location,
@@ -8211,6 +9094,15 @@ void GL_APIENTRY glProgramUniform4uivContextANGLE(GLeglContext ctx,
                                                   const GLuint *value)
 {
     return gl::ProgramUniform4uivContextANGLE(ctx, program, location, count, value);
+}
+
+void GL_APIENTRY glProgramUniform4uivEXTContextANGLE(GLeglContext ctx,
+                                                     GLuint program,
+                                                     GLint location,
+                                                     GLsizei count,
+                                                     const GLuint *value)
+{
+    return gl::ProgramUniform4uivEXTContextANGLE(ctx, program, location, count, value);
 }
 
 void GL_APIENTRY glProgramUniformMatrix2fvContextANGLE(GLeglContext ctx,
@@ -8221,6 +9113,17 @@ void GL_APIENTRY glProgramUniformMatrix2fvContextANGLE(GLeglContext ctx,
                                                        const GLfloat *value)
 {
     return gl::ProgramUniformMatrix2fvContextANGLE(ctx, program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix2fvEXTContextANGLE(GLeglContext ctx,
+                                                          GLuint program,
+                                                          GLint location,
+                                                          GLsizei count,
+                                                          GLboolean transpose,
+                                                          const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                      value);
 }
 
 void GL_APIENTRY glProgramUniformMatrix2x3fvContextANGLE(GLeglContext ctx,
@@ -8234,6 +9137,17 @@ void GL_APIENTRY glProgramUniformMatrix2x3fvContextANGLE(GLeglContext ctx,
                                                      value);
 }
 
+void GL_APIENTRY glProgramUniformMatrix2x3fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2x3fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
+}
+
 void GL_APIENTRY glProgramUniformMatrix2x4fvContextANGLE(GLeglContext ctx,
                                                          GLuint program,
                                                          GLint location,
@@ -8245,6 +9159,17 @@ void GL_APIENTRY glProgramUniformMatrix2x4fvContextANGLE(GLeglContext ctx,
                                                      value);
 }
 
+void GL_APIENTRY glProgramUniformMatrix2x4fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix2x4fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
+}
+
 void GL_APIENTRY glProgramUniformMatrix3fvContextANGLE(GLeglContext ctx,
                                                        GLuint program,
                                                        GLint location,
@@ -8253,6 +9178,17 @@ void GL_APIENTRY glProgramUniformMatrix3fvContextANGLE(GLeglContext ctx,
                                                        const GLfloat *value)
 {
     return gl::ProgramUniformMatrix3fvContextANGLE(ctx, program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix3fvEXTContextANGLE(GLeglContext ctx,
+                                                          GLuint program,
+                                                          GLint location,
+                                                          GLsizei count,
+                                                          GLboolean transpose,
+                                                          const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                      value);
 }
 
 void GL_APIENTRY glProgramUniformMatrix3x2fvContextANGLE(GLeglContext ctx,
@@ -8266,6 +9202,17 @@ void GL_APIENTRY glProgramUniformMatrix3x2fvContextANGLE(GLeglContext ctx,
                                                      value);
 }
 
+void GL_APIENTRY glProgramUniformMatrix3x2fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3x2fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
+}
+
 void GL_APIENTRY glProgramUniformMatrix3x4fvContextANGLE(GLeglContext ctx,
                                                          GLuint program,
                                                          GLint location,
@@ -8277,6 +9224,17 @@ void GL_APIENTRY glProgramUniformMatrix3x4fvContextANGLE(GLeglContext ctx,
                                                      value);
 }
 
+void GL_APIENTRY glProgramUniformMatrix3x4fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix3x4fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
+}
+
 void GL_APIENTRY glProgramUniformMatrix4fvContextANGLE(GLeglContext ctx,
                                                        GLuint program,
                                                        GLint location,
@@ -8285,6 +9243,17 @@ void GL_APIENTRY glProgramUniformMatrix4fvContextANGLE(GLeglContext ctx,
                                                        const GLfloat *value)
 {
     return gl::ProgramUniformMatrix4fvContextANGLE(ctx, program, location, count, transpose, value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix4fvEXTContextANGLE(GLeglContext ctx,
+                                                          GLuint program,
+                                                          GLint location,
+                                                          GLsizei count,
+                                                          GLboolean transpose,
+                                                          const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                      value);
 }
 
 void GL_APIENTRY glProgramUniformMatrix4x2fvContextANGLE(GLeglContext ctx,
@@ -8298,6 +9267,17 @@ void GL_APIENTRY glProgramUniformMatrix4x2fvContextANGLE(GLeglContext ctx,
                                                      value);
 }
 
+void GL_APIENTRY glProgramUniformMatrix4x2fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4x2fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
+}
+
 void GL_APIENTRY glProgramUniformMatrix4x3fvContextANGLE(GLeglContext ctx,
                                                          GLuint program,
                                                          GLint location,
@@ -8307,6 +9287,17 @@ void GL_APIENTRY glProgramUniformMatrix4x3fvContextANGLE(GLeglContext ctx,
 {
     return gl::ProgramUniformMatrix4x3fvContextANGLE(ctx, program, location, count, transpose,
                                                      value);
+}
+
+void GL_APIENTRY glProgramUniformMatrix4x3fvEXTContextANGLE(GLeglContext ctx,
+                                                            GLuint program,
+                                                            GLint location,
+                                                            GLsizei count,
+                                                            GLboolean transpose,
+                                                            const GLfloat *value)
+{
+    return gl::ProgramUniformMatrix4x3fvEXTContextANGLE(ctx, program, location, count, transpose,
+                                                        value);
 }
 
 void GL_APIENTRY glPushDebugGroupContextANGLE(GLeglContext ctx,
@@ -8662,6 +9653,22 @@ void GL_APIENTRY glTexBufferContextANGLE(GLeglContext ctx,
     return gl::TexBufferContextANGLE(ctx, target, internalformat, buffer);
 }
 
+void GL_APIENTRY glTexBufferEXTContextANGLE(GLeglContext ctx,
+                                            GLenum target,
+                                            GLenum internalformat,
+                                            GLuint buffer)
+{
+    return gl::TexBufferEXTContextANGLE(ctx, target, internalformat, buffer);
+}
+
+void GL_APIENTRY glTexBufferOESContextANGLE(GLeglContext ctx,
+                                            GLenum target,
+                                            GLenum internalformat,
+                                            GLuint buffer)
+{
+    return gl::TexBufferOESContextANGLE(ctx, target, internalformat, buffer);
+}
+
 void GL_APIENTRY glTexBufferRangeContextANGLE(GLeglContext ctx,
                                               GLenum target,
                                               GLenum internalformat,
@@ -8670,6 +9677,26 @@ void GL_APIENTRY glTexBufferRangeContextANGLE(GLeglContext ctx,
                                               GLsizeiptr size)
 {
     return gl::TexBufferRangeContextANGLE(ctx, target, internalformat, buffer, offset, size);
+}
+
+void GL_APIENTRY glTexBufferRangeEXTContextANGLE(GLeglContext ctx,
+                                                 GLenum target,
+                                                 GLenum internalformat,
+                                                 GLuint buffer,
+                                                 GLintptr offset,
+                                                 GLsizeiptr size)
+{
+    return gl::TexBufferRangeEXTContextANGLE(ctx, target, internalformat, buffer, offset, size);
+}
+
+void GL_APIENTRY glTexBufferRangeOESContextANGLE(GLeglContext ctx,
+                                                 GLenum target,
+                                                 GLenum internalformat,
+                                                 GLuint buffer,
+                                                 GLintptr offset,
+                                                 GLsizeiptr size)
+{
+    return gl::TexBufferRangeOESContextANGLE(ctx, target, internalformat, buffer, offset, size);
 }
 
 void GL_APIENTRY glTexCoordPointerContextANGLE(GLeglContext ctx,
@@ -9390,6 +10417,14 @@ void GL_APIENTRY glUseProgramStagesContextANGLE(GLeglContext ctx,
     return gl::UseProgramStagesContextANGLE(ctx, pipeline, stages, program);
 }
 
+void GL_APIENTRY glUseProgramStagesEXTContextANGLE(GLeglContext ctx,
+                                                   GLuint pipeline,
+                                                   GLbitfield stages,
+                                                   GLuint program)
+{
+    return gl::UseProgramStagesEXTContextANGLE(ctx, pipeline, stages, program);
+}
+
 void GL_APIENTRY glValidateProgramContextANGLE(GLeglContext ctx, GLuint program)
 {
     return gl::ValidateProgramContextANGLE(ctx, program);
@@ -9398,6 +10433,11 @@ void GL_APIENTRY glValidateProgramContextANGLE(GLeglContext ctx, GLuint program)
 void GL_APIENTRY glValidateProgramPipelineContextANGLE(GLeglContext ctx, GLuint pipeline)
 {
     return gl::ValidateProgramPipelineContextANGLE(ctx, pipeline);
+}
+
+void GL_APIENTRY glValidateProgramPipelineEXTContextANGLE(GLeglContext ctx, GLuint pipeline)
+{
+    return gl::ValidateProgramPipelineEXTContextANGLE(ctx, pipeline);
 }
 
 void GL_APIENTRY glVertexAttrib1fContextANGLE(GLeglContext ctx, GLuint index, GLfloat x)
@@ -10613,6 +11653,74 @@ void GL_APIENTRY glGetRenderbufferImageANGLEContextANGLE(GLeglContext ctx,
                                                          void *pixels)
 {
     return gl::GetRenderbufferImageANGLEContextANGLE(ctx, target, format, type, pixels);
+}
+
+void GL_APIENTRY glTexStorageMemFlags2DANGLEContextANGLE(GLeglContext ctx,
+                                                         GLenum target,
+                                                         GLsizei levels,
+                                                         GLenum internalFormat,
+                                                         GLsizei width,
+                                                         GLsizei height,
+                                                         GLuint memory,
+                                                         GLuint64 offset,
+                                                         GLbitfield createFlags,
+                                                         GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags2DANGLEContextANGLE(ctx, target, levels, internalFormat, width,
+                                                     height, memory, offset, createFlags,
+                                                     usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags2DMultisampleANGLEContextANGLE(GLeglContext ctx,
+                                                                    GLenum target,
+                                                                    GLsizei samples,
+                                                                    GLenum internalFormat,
+                                                                    GLsizei width,
+                                                                    GLsizei height,
+                                                                    GLboolean fixedSampleLocations,
+                                                                    GLuint memory,
+                                                                    GLuint64 offset,
+                                                                    GLbitfield createFlags,
+                                                                    GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags2DMultisampleANGLEContextANGLE(
+        ctx, target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset,
+        createFlags, usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags3DANGLEContextANGLE(GLeglContext ctx,
+                                                         GLenum target,
+                                                         GLsizei levels,
+                                                         GLenum internalFormat,
+                                                         GLsizei width,
+                                                         GLsizei height,
+                                                         GLsizei depth,
+                                                         GLuint memory,
+                                                         GLuint64 offset,
+                                                         GLbitfield createFlags,
+                                                         GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags3DANGLEContextANGLE(ctx, target, levels, internalFormat, width,
+                                                     height, depth, memory, offset, createFlags,
+                                                     usageFlags);
+}
+
+void GL_APIENTRY glTexStorageMemFlags3DMultisampleANGLEContextANGLE(GLeglContext ctx,
+                                                                    GLenum target,
+                                                                    GLsizei samples,
+                                                                    GLenum internalFormat,
+                                                                    GLsizei width,
+                                                                    GLsizei height,
+                                                                    GLsizei depth,
+                                                                    GLboolean fixedSampleLocations,
+                                                                    GLuint memory,
+                                                                    GLuint64 offset,
+                                                                    GLbitfield createFlags,
+                                                                    GLbitfield usageFlags)
+{
+    return gl::TexStorageMemFlags3DMultisampleANGLEContextANGLE(
+        ctx, target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory,
+        offset, createFlags, usageFlags);
 }
 
 void GL_APIENTRY glImportMemoryZirconHandleANGLEContextANGLE(GLeglContext ctx,

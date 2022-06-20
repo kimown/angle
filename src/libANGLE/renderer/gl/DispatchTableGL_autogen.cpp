@@ -1798,6 +1798,7 @@ void DispatchTableGL::initProcsDesktopGL(const gl::Version &version,
     if (extensions.count("GL_EXT_texture_buffer_object") != 0)
     {
         ASSIGN("glTexBufferEXT", texBuffer);
+        ASSIGN("glTexBufferEXT", texBufferEXT);
     }
 
     if (extensions.count("GL_EXT_texture_integer") != 0)
@@ -2458,7 +2459,9 @@ void DispatchTableGL::initProcsGLES(const gl::Version &version,
     if (extensions.count("GL_EXT_texture_buffer") != 0)
     {
         ASSIGN("glTexBufferEXT", texBuffer);
+        ASSIGN("glTexBufferEXT", texBufferEXT);
         ASSIGN("glTexBufferRangeEXT", texBufferRange);
+        ASSIGN("glTexBufferRangeEXT", texBufferRangeEXT);
     }
 
     if (extensions.count("GL_EXT_texture_storage") != 0)
@@ -2589,7 +2592,9 @@ void DispatchTableGL::initProcsGLES(const gl::Version &version,
     if (extensions.count("GL_OES_texture_buffer") != 0)
     {
         ASSIGN("glTexBufferOES", texBuffer);
+        ASSIGN("glTexBufferOES", texBufferOES);
         ASSIGN("glTexBufferRangeOES", texBufferRange);
+        ASSIGN("glTexBufferRangeOES", texBufferRangeOES);
     }
 
     if (extensions.count("GL_OES_texture_storage_multisample_2d_array") != 0)
@@ -2753,7 +2758,6 @@ void DispatchTableGL::initProcsSharedExtensions(const std::set<std::string> &ext
         ASSIGN("glProgramUniformMatrix3fvEXT", programUniformMatrix3fv);
         ASSIGN("glProgramUniformMatrix3x2fvEXT", programUniformMatrix3x2fv);
         ASSIGN("glProgramUniformMatrix3x4fvEXT", programUniformMatrix3x4fv);
-        ASSIGN("glProgramUniformMatrix4fvEXT", programUniformMatrix4fv);
         ASSIGN("glProgramUniformMatrix4fvEXT", programUniformMatrix4fv);
         ASSIGN("glProgramUniformMatrix4x2fvEXT", programUniformMatrix4x2fv);
         ASSIGN("glProgramUniformMatrix4x3fvEXT", programUniformMatrix4x3fv);
@@ -4562,7 +4566,8 @@ void DispatchTableGL::initProcsDesktopGLNULL(const gl::Version &version,
 
     if (extensions.count("GL_EXT_texture_buffer_object") != 0)
     {
-        texBuffer = &glTexBufferNULL;
+        texBuffer    = &glTexBufferNULL;
+        texBufferEXT = &glTexBufferEXTNULL;
     }
 
     if (extensions.count("GL_EXT_texture_integer") != 0)
@@ -5222,8 +5227,10 @@ void DispatchTableGL::initProcsGLESNULL(const gl::Version &version,
 
     if (extensions.count("GL_EXT_texture_buffer") != 0)
     {
-        texBuffer      = &glTexBufferNULL;
-        texBufferRange = &glTexBufferRangeNULL;
+        texBuffer         = &glTexBufferNULL;
+        texBufferEXT      = &glTexBufferEXTNULL;
+        texBufferRange    = &glTexBufferRangeNULL;
+        texBufferRangeEXT = &glTexBufferRangeEXTNULL;
     }
 
     if (extensions.count("GL_EXT_texture_storage") != 0)
@@ -5353,8 +5360,10 @@ void DispatchTableGL::initProcsGLESNULL(const gl::Version &version,
 
     if (extensions.count("GL_OES_texture_buffer") != 0)
     {
-        texBuffer      = &glTexBufferNULL;
-        texBufferRange = &glTexBufferRangeNULL;
+        texBuffer         = &glTexBufferNULL;
+        texBufferOES      = &glTexBufferOESNULL;
+        texBufferRange    = &glTexBufferRangeNULL;
+        texBufferRangeOES = &glTexBufferRangeOESNULL;
     }
 
     if (extensions.count("GL_OES_texture_storage_multisample_2d_array") != 0)
@@ -5518,7 +5527,6 @@ void DispatchTableGL::initProcsSharedExtensionsNULL(const std::set<std::string> 
         programUniformMatrix3fv   = &glProgramUniformMatrix3fvNULL;
         programUniformMatrix3x2fv = &glProgramUniformMatrix3x2fvNULL;
         programUniformMatrix3x4fv = &glProgramUniformMatrix3x4fvNULL;
-        programUniformMatrix4fv   = &glProgramUniformMatrix4fvNULL;
         programUniformMatrix4fv   = &glProgramUniformMatrix4fvNULL;
         programUniformMatrix4x2fv = &glProgramUniformMatrix4x2fvNULL;
         programUniformMatrix4x3fv = &glProgramUniformMatrix4x3fvNULL;

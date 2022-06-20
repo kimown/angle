@@ -11,9 +11,10 @@
 #ifndef LIBANGLE_RENDERER_VULKAN_VK_WRAPPER_H_
 #define LIBANGLE_RENDERER_VULKAN_VK_WRAPPER_H_
 
+#include "common/vulkan/vk_headers.h"
 #include "libANGLE/renderer/renderer_utils.h"
-#include "libANGLE/renderer/vulkan/vk_headers.h"
 #include "libANGLE/renderer/vulkan/vk_mem_alloc_wrapper.h"
+#include "libANGLE/trace.h"
 
 namespace rx
 {
@@ -47,6 +48,7 @@ namespace vk
     FUNC(QueryPool)                \
     FUNC(RenderPass)               \
     FUNC(Sampler)                  \
+    FUNC(SamplerYcbcrConversion)   \
     FUNC(Semaphore)                \
     FUNC(ShaderModule)
 
@@ -322,6 +324,8 @@ class CommandBuffer : public WrappedObject<CommandBuffer, VkCommandBuffer>
                        VkPipelineStageFlags dstStageMask,
                        const VkMemoryBarrier *memoryBarrier);
 
+    void nextSubpass(VkSubpassContents subpassContents);
+
     void pipelineBarrier(VkPipelineStageFlags srcStageMask,
                          VkPipelineStageFlags dstStageMask,
                          VkDependencyFlags dependencyFlags,
@@ -339,6 +343,7 @@ class CommandBuffer : public WrappedObject<CommandBuffer, VkCommandBuffer>
                        const void *data);
 
     void setEvent(VkEvent event, VkPipelineStageFlags stageMask);
+    void setScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D *scissors);
     VkResult reset();
     void resetEvent(VkEvent event, VkPipelineStageFlags stageMask);
     void resetQueryPool(const QueryPool &queryPool, uint32_t firstQuery, uint32_t queryCount);
@@ -456,6 +461,8 @@ class DeviceMemory final : public WrappedObject<DeviceMemory, VkDeviceMemory>
                  VkMemoryMapFlags flags,
                  uint8_t **mapPointer) const;
     void unmap(VkDevice device) const;
+    void flush(VkDevice device, VkMappedMemoryRange &memRange);
+    void invalidate(VkDevice device, VkMappedMemoryRange &memRange);
 };
 
 class Allocator : public WrappedObject<Allocator, VmaAllocator>
@@ -464,7 +471,11 @@ class Allocator : public WrappedObject<Allocator, VmaAllocator>
     Allocator() = default;
     void destroy();
 
-    VkResult init(VkPhysicalDevice physicalDevice, VkDevice device, VkInstance instance);
+    VkResult init(VkPhysicalDevice physicalDevice,
+                  VkDevice device,
+                  VkInstance instance,
+                  uint32_t apiVersion,
+                  VkDeviceSize preferredLargeHeapBlockSize);
 
     // Initializes the buffer handle and memory allocation.
     VkResult createBuffer(const VkBufferCreateInfo &bufferCreateInfo,
@@ -476,6 +487,14 @@ class Allocator : public WrappedObject<Allocator, VmaAllocator>
                           Allocation *allocationOut) const;
 
     void getMemoryTypeProperties(uint32_t memoryTypeIndex, VkMemoryPropertyFlags *flagsOut) const;
+    VkResult findMemoryTypeIndexForBufferInfo(const VkBufferCreateInfo &bufferCreateInfo,
+                                              VkMemoryPropertyFlags requiredFlags,
+                                              VkMemoryPropertyFlags preferredFlags,
+                                              bool persistentlyMappedBuffers,
+                                              uint32_t *memoryTypeIndexOut) const;
+
+    void buildStatsString(char **statsString, VkBool32 detailedMap);
+    void freeStatsString(char *statsString);
 };
 
 class Allocation final : public WrappedObject<Allocation, VmaAllocation>
@@ -500,6 +519,7 @@ class RenderPass final : public WrappedObject<RenderPass, VkRenderPass>
     void destroy(VkDevice device);
 
     VkResult init(VkDevice device, const VkRenderPassCreateInfo &createInfo);
+    VkResult init2(VkDevice device, const VkRenderPassCreateInfo2 &createInfo);
 };
 
 enum class StagingUsage
@@ -595,6 +615,15 @@ class Sampler final : public WrappedObject<Sampler, VkSampler>
     Sampler() = default;
     void destroy(VkDevice device);
     VkResult init(VkDevice device, const VkSamplerCreateInfo &createInfo);
+};
+
+class SamplerYcbcrConversion final
+    : public WrappedObject<SamplerYcbcrConversion, VkSamplerYcbcrConversion>
+{
+  public:
+    SamplerYcbcrConversion() = default;
+    void destroy(VkDevice device);
+    VkResult init(VkDevice device, const VkSamplerYcbcrConversionCreateInfo &createInfo);
 };
 
 class Event final : public WrappedObject<Event, VkEvent>
@@ -711,6 +740,7 @@ ANGLE_INLINE VkResult CommandBuffer::begin(const VkCommandBufferBeginInfo &info)
 
 ANGLE_INLINE VkResult CommandBuffer::end()
 {
+    ANGLE_TRACE_EVENT0("gpu.angle", "CommandBuffer::end");
     ASSERT(valid());
     return vkEndCommandBuffer(mHandle);
 }
@@ -728,6 +758,12 @@ ANGLE_INLINE void CommandBuffer::memoryBarrier(VkPipelineStageFlags srcStageMask
     ASSERT(valid());
     vkCmdPipelineBarrier(mHandle, srcStageMask, dstStageMask, 0, 1, memoryBarrier, 0, nullptr, 0,
                          nullptr);
+}
+
+ANGLE_INLINE void CommandBuffer::nextSubpass(VkSubpassContents subpassContents)
+{
+    ASSERT(valid());
+    vkCmdNextSubpass(mHandle, subpassContents);
 }
 
 ANGLE_INLINE void CommandBuffer::pipelineBarrier(VkPipelineStageFlags srcStageMask,
@@ -936,6 +972,14 @@ ANGLE_INLINE void CommandBuffer::setEvent(VkEvent event, VkPipelineStageFlags st
 {
     ASSERT(valid() && event != VK_NULL_HANDLE);
     vkCmdSetEvent(mHandle, event, stageMask);
+}
+
+ANGLE_INLINE void CommandBuffer::setScissor(uint32_t firstScissor,
+                                            uint32_t scissorCount,
+                                            const VkRect2D *scissors)
+{
+    ASSERT(valid() && scissors != nullptr);
+    vkCmdSetScissor(mHandle, firstScissor, scissorCount, scissors);
 }
 
 ANGLE_INLINE void CommandBuffer::resetEvent(VkEvent event, VkPipelineStageFlags stageMask)
@@ -1350,6 +1394,7 @@ ANGLE_INLINE VkResult DeviceMemory::map(VkDevice device,
                                         VkMemoryMapFlags flags,
                                         uint8_t **mapPointer) const
 {
+    ANGLE_TRACE_EVENT0("gpu.angle", "DeviceMemory::map");
     ASSERT(valid());
     return vkMapMemory(device, mHandle, offset, size, flags, reinterpret_cast<void **>(mapPointer));
 }
@@ -1358,6 +1403,16 @@ ANGLE_INLINE void DeviceMemory::unmap(VkDevice device) const
 {
     ASSERT(valid());
     vkUnmapMemory(device, mHandle);
+}
+
+ANGLE_INLINE void DeviceMemory::flush(VkDevice device, VkMappedMemoryRange &memRange)
+{
+    vkFlushMappedMemoryRanges(device, 1, &memRange);
+}
+
+ANGLE_INLINE void DeviceMemory::invalidate(VkDevice device, VkMappedMemoryRange &memRange)
+{
+    vkInvalidateMappedMemoryRanges(device, 1, &memRange);
 }
 
 // Allocator implementation.
@@ -1372,10 +1427,13 @@ ANGLE_INLINE void Allocator::destroy()
 
 ANGLE_INLINE VkResult Allocator::init(VkPhysicalDevice physicalDevice,
                                       VkDevice device,
-                                      VkInstance instance)
+                                      VkInstance instance,
+                                      uint32_t apiVersion,
+                                      VkDeviceSize preferredLargeHeapBlockSize)
 {
     ASSERT(!valid());
-    return vma::InitAllocator(physicalDevice, device, instance, &mHandle);
+    return vma::InitAllocator(physicalDevice, device, instance, apiVersion,
+                              preferredLargeHeapBlockSize, &mHandle);
 }
 
 ANGLE_INLINE VkResult Allocator::createBuffer(const VkBufferCreateInfo &bufferCreateInfo,
@@ -1399,6 +1457,31 @@ ANGLE_INLINE void Allocator::getMemoryTypeProperties(uint32_t memoryTypeIndex,
 {
     ASSERT(valid());
     vma::GetMemoryTypeProperties(mHandle, memoryTypeIndex, flagsOut);
+}
+
+ANGLE_INLINE VkResult
+Allocator::findMemoryTypeIndexForBufferInfo(const VkBufferCreateInfo &bufferCreateInfo,
+                                            VkMemoryPropertyFlags requiredFlags,
+                                            VkMemoryPropertyFlags preferredFlags,
+                                            bool persistentlyMappedBuffers,
+                                            uint32_t *memoryTypeIndexOut) const
+{
+    ASSERT(valid());
+    return vma::FindMemoryTypeIndexForBufferInfo(mHandle, &bufferCreateInfo, requiredFlags,
+                                                 preferredFlags, persistentlyMappedBuffers,
+                                                 memoryTypeIndexOut);
+}
+
+ANGLE_INLINE void Allocator::buildStatsString(char **statsString, VkBool32 detailedMap)
+{
+    ASSERT(valid());
+    vma::BuildStatsString(mHandle, statsString, detailedMap);
+}
+
+ANGLE_INLINE void Allocator::freeStatsString(char *statsString)
+{
+    ASSERT(valid());
+    vma::FreeStatsString(mHandle, statsString);
 }
 
 // Allocation implementation.
@@ -1453,6 +1536,12 @@ ANGLE_INLINE VkResult RenderPass::init(VkDevice device, const VkRenderPassCreate
 {
     ASSERT(!valid());
     return vkCreateRenderPass(device, &createInfo, nullptr, &mHandle);
+}
+
+ANGLE_INLINE VkResult RenderPass::init2(VkDevice device, const VkRenderPassCreateInfo2 &createInfo)
+{
+    ASSERT(!valid());
+    return vkCreateRenderPass2KHR(device, &createInfo, nullptr, &mHandle);
 }
 
 // Buffer implementation.
@@ -1671,6 +1760,23 @@ ANGLE_INLINE VkResult Sampler::init(VkDevice device, const VkSamplerCreateInfo &
 {
     ASSERT(!valid());
     return vkCreateSampler(device, &createInfo, nullptr, &mHandle);
+}
+
+// SamplerYuvConversion implementation.
+ANGLE_INLINE void SamplerYcbcrConversion::destroy(VkDevice device)
+{
+    if (valid())
+    {
+        vkDestroySamplerYcbcrConversionKHR(device, mHandle, nullptr);
+        mHandle = VK_NULL_HANDLE;
+    }
+}
+
+ANGLE_INLINE VkResult
+SamplerYcbcrConversion::init(VkDevice device, const VkSamplerYcbcrConversionCreateInfo &createInfo)
+{
+    ASSERT(!valid());
+    return vkCreateSamplerYcbcrConversionKHR(device, &createInfo, nullptr, &mHandle);
 }
 
 // Event implementation.

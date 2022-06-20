@@ -310,6 +310,7 @@ OutputHLSL::OutputHLSL(sh::GLenum shaderType,
                        sh::WorkGroupSize workGroupSize,
                        TSymbolTable *symbolTable,
                        PerformanceDiagnostics *perfDiagnostics,
+                       const std::map<int, const TInterfaceBlock *> &uniformBlockOptimizedMap,
                        const std::vector<InterfaceBlock> &shaderStorageBlocks)
     : TIntermTraverser(true, true, true, symbolTable),
       mShaderType(shaderType),
@@ -321,6 +322,7 @@ OutputHLSL::OutputHLSL(sh::GLenum shaderType,
       mCompileOptions(compileOptions),
       mInsideFunction(false),
       mInsideMain(false),
+      mUniformBlockOptimizedMap(uniformBlockOptimizedMap),
       mNumRenderTargets(numRenderTargets),
       mMaxDualSourceDrawBuffers(maxDualSourceDrawBuffers),
       mCurrentFunctionMetadata(nullptr),
@@ -371,8 +373,7 @@ OutputHLSL::OutputHLSL(sh::GLenum shaderType,
 
     unsigned int firstUniformRegister =
         ((compileOptions & SH_SKIP_D3D_CONSTANT_REGISTER_ZERO) != 0) ? 1u : 0u;
-    mResourcesHLSL = new ResourcesHLSL(mStructureHLSL, outputType, compileOptions, uniforms,
-                                       firstUniformRegister);
+    mResourcesHLSL = new ResourcesHLSL(mStructureHLSL, outputType, uniforms, firstUniformRegister);
 
     if (mOutputType == SH_HLSL_3_0_OUTPUT)
     {
@@ -659,7 +660,7 @@ void OutputHLSL::header(TInfoSinkBase &out,
     out << mStructureHLSL->structsHeader();
 
     mResourcesHLSL->uniformsHeader(out, mOutputType, mReferencedUniforms, mSymbolTable);
-    out << mResourcesHLSL->uniformBlocksHeader(mReferencedUniformBlocks);
+    out << mResourcesHLSL->uniformBlocksHeader(mReferencedUniformBlocks, mUniformBlockOptimizedMap);
     mSSBOOutputHLSL->writeShaderStorageBlocksHeader(out);
 
     if (!mEqualityFunctions.empty())
@@ -1648,13 +1649,17 @@ bool OutputHLSL::visitBinary(Visit visit, TIntermBinary *node)
                     const TInterfaceBlock *interfaceBlock =
                         GetInterfaceBlockOfUniformBlockNearestIndexOperator(node->getLeft());
                     if (interfaceBlock &&
-                        mResourcesHLSL->shouldTranslateUniformBlockToStructuredBuffer(
-                            *interfaceBlock))
+                        mUniformBlockOptimizedMap.count(interfaceBlock->uniqueId().get()) != 0)
                     {
-                        const TField *field = interfaceBlock->fields()[0];
-                        if (field->type()->isMatrix())
+                        // If the uniform block member's type is not structure, we had explicitly
+                        // packed the member into a structure, so need to add an operator of field
+                        // slection.
+                        const TField *field    = interfaceBlock->fields()[0];
+                        const TType *fieldType = field->type();
+                        if (fieldType->isMatrix() || fieldType->isVectorArray() ||
+                            fieldType->isScalarArray())
                         {
-                            out << "._matrix_" << Decorate(field->name());
+                            out << "." << Decorate(field->name());
                         }
                     }
                 }
@@ -1679,13 +1684,17 @@ bool OutputHLSL::visitBinary(Visit visit, TIntermBinary *node)
                     const TInterfaceBlock *interfaceBlock =
                         GetInterfaceBlockOfUniformBlockNearestIndexOperator(node->getLeft());
                     if (interfaceBlock &&
-                        mResourcesHLSL->shouldTranslateUniformBlockToStructuredBuffer(
-                            *interfaceBlock))
+                        mUniformBlockOptimizedMap.count(interfaceBlock->uniqueId().get()) != 0)
                     {
-                        const TField *field = interfaceBlock->fields()[0];
-                        if (field->type()->isMatrix())
+                        // If the uniform block member's type is not structure, we had explicitly
+                        // packed the member into a structure, so need to add an operator of field
+                        // slection.
+                        const TField *field    = interfaceBlock->fields()[0];
+                        const TType *fieldType = field->type();
+                        if (fieldType->isMatrix() || fieldType->isVectorArray() ||
+                            fieldType->isScalarArray())
                         {
-                            out << "._matrix_" << Decorate(field->name());
+                            out << "." << Decorate(field->name());
                         }
                     }
                 }
@@ -1747,7 +1756,7 @@ bool OutputHLSL::visitBinary(Visit visit, TIntermBinary *node)
                 const TIntermConstantUnion *index = node->getRight()->getAsConstantUnion();
                 const TField *field               = interfaceBlock->fields()[index->getIConst(0)];
                 if (structInStd140UniformBlock ||
-                    mResourcesHLSL->shouldTranslateUniformBlockToStructuredBuffer(*interfaceBlock))
+                    mUniformBlockOptimizedMap.count(interfaceBlock->uniqueId().get()) != 0)
                 {
                     out << "_";
                 }
