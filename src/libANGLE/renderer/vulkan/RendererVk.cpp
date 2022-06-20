@@ -99,6 +99,15 @@ VkResult VerifyExtensionsPresent(const RendererVk::ExtensionNameList &haystack,
     {
         return VK_SUCCESS;
     }
+
+    for (const char *needle : haystack)
+    {
+        if (!ExtensionFound(needle, haystack))
+        {
+            ERR() << "Extension has supported: " << needle;
+        }
+    }
+
     for (const char *needle : needles)
     {
         if (!ExtensionFound(needle, haystack))
@@ -725,6 +734,8 @@ angle::Result RendererVk::initialize(DisplayVk *displayVk,
         VkDebugUtilsMessengerCreateInfoEXT messengerInfo = {};
 
         constexpr VkDebugUtilsMessageSeverityFlagsEXT kSeveritiesToLog =
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT;
 
@@ -1039,6 +1050,7 @@ angle::Result RendererVk::initializeDevice(DisplayVk *displayVk, uint32_t queueF
 
     ExtensionNameList enabledDeviceExtensions;
     enabledDeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    enabledDeviceExtensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
 
     // Queues: map low, med, high priority to whatever is supported up to 3 queues
     uint32_t queueCount = std::min(mQueueFamilyProperties[queueFamilyIndex].queueCount,

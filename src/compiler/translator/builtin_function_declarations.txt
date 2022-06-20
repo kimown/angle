@@ -85,6 +85,10 @@ GROUP END Exponential
 
 GROUP BEGIN Common
   DEFAULT METADATA {"essl_level": "COMMON_BUILTINS", "glsl_level": "COMMON_BUILTINS", "op": "auto"}
+    void debugPrintfEXT(genType);
+  DEFAULT METADATA {"essl_level": "COMMON_BUILTINS", "glsl_level": "COMMON_BUILTINS", "op": "auto"}
+    void debugPrintfEXT(genIType);
+  DEFAULT METADATA {"essl_level": "COMMON_BUILTINS", "glsl_level": "COMMON_BUILTINS", "op": "auto"}
     genType abs(genType);
   DEFAULT METADATA {"essl_level": "ESSL3_BUILTINS", "glsl_level": "GLSL1_3_BUILTINS", "op": "auto"}
     genIType abs(genIType);

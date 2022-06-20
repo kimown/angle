@@ -799,7 +799,47 @@ bool TOutputGLSLBase::visitUnary(Visit visit, TIntermUnary *node)
             preString  = "((";
             postString = ").length())";
             break;
+        case EOpDebugPrintfEXT:
+            printf("%d, %s, %s, \n",node->getLine().first_line,node->getFunction()->name().data(),node->getOperand()->getType().getBasicString());
+            if(node->getChildNode(0)->getAsTyped()->getQualifier()==EvqConst){
+                printf("constant value\n");
+                if(node->getChildNode(0)->getAsTyped()->isScalarInt()){
+                    preString  = "debugPrintfEXT(\"constant value, %d\",";
+                } else if(node->getChildNode(0)->getAsTyped()->isScalar()){
+                    preString  = "debugPrintfEXT(\"constant value, %f\",";
+                } else {
+                    preString  = "debugPrintfEXT(\"constant value, not implement\",";
+                }
 
+                postString = ")";
+            } else {
+                TIntermTyped *typed = node->getOperand();
+                TIntermSymbol *symbol = node->getOperand()->getAsSymbolNode();
+                const ImmutableString &name = symbol->variable().name();
+                const char *variableName = name.data();
+                printf("-----name %s\n",variableName);
+                char cmd [130];
+                if(typed->getType().isScalarInt()){
+                    strcpy(cmd, "debugPrintfEXT(\"dynamic vaulue:");
+                    strcat(cmd, variableName);
+                    strcat(cmd, ", %d\",");
+                    preString  = cmd;
+                } else if (typed->getType().isScalarFloat()){
+                    strcpy(cmd, "debugPrintfEXT(\"dynamic vaulue:");
+                    strcat(cmd, variableName);
+                    strcat(cmd, ", %f\",");
+                    preString  = cmd;
+                } else if(typed->getType().isVector()){
+                    int vecSize = (int)symbol->getType().getNominalSize();
+                    char *msgOut;
+                    asprintf(&msgOut, "debugPrintfEXT(\"dynamic vaulue:%s, %%v%df\",",variableName , vecSize);
+                    preString  = msgOut;
+                } else {
+                    preString  = "debugPrintfEXT(\"dynamic value, not implement\",";
+                }
+                postString = ")";
+            }
+            break;
         case EOpRadians:
         case EOpDegrees:
         case EOpSin:

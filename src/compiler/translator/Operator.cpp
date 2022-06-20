@@ -156,6 +156,8 @@ const char *GetOperatorString(TOperator op)
 
         case EOpAbs:
             return "abs";
+        case EOpDebugPrintfEXT:
+            return "debugPrintfEXT";
         case EOpSign:
             return "sign";
         case EOpFloor:

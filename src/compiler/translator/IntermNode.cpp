@@ -2829,6 +2829,11 @@ TConstantUnion *TIntermConstantUnion::foldUnaryComponentWise(TOperator op,
                         return nullptr;
                 }
                 break;
+//
+//            case EOpDebugPrintfEXT:
+//                printf("-------\n");
+//                foldFloatTypeUnary(operandArray[i], &cosf, &resultArray[i]);
+//                break;
 
             case EOpSign:
                 switch (getType().getBasicType())

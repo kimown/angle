@@ -29,6 +29,8 @@ class HelloTriangleSample : public SampleApplication
         constexpr char kVS[] = R"(attribute vec4 vPosition;
 void main()
 {
+    int a=2333333;
+    debugPrintfEXT(a);
     gl_Position = vPosition;
 })";
 
