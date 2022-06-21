@@ -46,7 +46,7 @@ void DisplayVkHeadless::checkConfigSupport(egl::Config *config) {}
 
 const char *DisplayVkHeadless::getWSIExtension() const
 {
-    return VK_EXT_HEADLESS_SURFACE_EXTENSION_NAME;
+    return VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 }
 
 bool IsVulkanHeadlessDisplayAvailable()
