@@ -36,6 +36,7 @@ angle::GenericProc KHRONOS_APIENTRY GlobalLoad(const char *symbol)
 
 void EnsureEGLLoaded()
 {
+    printf("----EnsureEGLLoaded -----------\n");
     if (gLoaded)
         return;
 

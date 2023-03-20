@@ -9,7 +9,7 @@
 //   Simple EGL function loader.
 
 #include "egl_loader_autogen.h"
-
+#include <iostream>
 ANGLE_UTIL_EXPORT PFNEGLCHOOSECONFIGPROC eglChooseConfig;
 ANGLE_UTIL_EXPORT PFNEGLCOPYBUFFERSPROC eglCopyBuffers;
 ANGLE_UTIL_EXPORT PFNEGLCREATECONTEXTPROC eglCreateContext;
@@ -111,7 +111,11 @@ namespace angle
 {
 void LoadEGL(LoadProc loadProc)
 {
+    printf("----LoadEGL-----------\n");
+
     eglChooseConfig  = reinterpret_cast<PFNEGLCHOOSECONFIGPROC>(loadProc("eglChooseConfig"));
+    printf("----eglChooseConfig-----------\n");
+
     eglCopyBuffers   = reinterpret_cast<PFNEGLCOPYBUFFERSPROC>(loadProc("eglCopyBuffers"));
     eglCreateContext = reinterpret_cast<PFNEGLCREATECONTEXTPROC>(loadProc("eglCreateContext"));
     eglCreatePbufferSurface =

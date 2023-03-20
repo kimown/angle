@@ -95,12 +95,22 @@ bool EGLWindow::initializeGL(OSWindow *osWindow,
                              const EGLPlatformParameters &platformParams,
                              const ConfigParameters &configParams)
 {
+    printf("----EGLWindow initializeGL-----------\n");
     if (!initializeDisplay(osWindow, glWindowingLibrary, platformParams))
+    {
+        printf("----EGLWindow initializeGL 1-----------\n");
         return false;
+    }
     if (!initializeSurface(osWindow, glWindowingLibrary, configParams))
+    {
+        printf("----EGLWindow initializeGL 2-----------\n");
         return false;
+    }
     if (!initializeContext())
+    {
+        printf("----EGLWindow initializeGL 3-----------\n");
         return false;
+    }
     return true;
 }
 
@@ -108,18 +118,26 @@ bool EGLWindow::initializeDisplay(OSWindow *osWindow,
                                   angle::Library *glWindowingLibrary,
                                   const EGLPlatformParameters &params)
 {
+    printf("----EGLWindow initializeDisplay11 -----------\n");
 #if defined(ANGLE_USE_UTIL_LOADER)
+    printf("----EGLWindow ANGLE_USE_UTIL_LOADER -----------\n");
+
     PFNEGLGETPROCADDRESSPROC getProcAddress;
     glWindowingLibrary->getAs("eglGetProcAddress", &getProcAddress);
     if (!getProcAddress)
     {
+        printf("----EGLWindow ANGLE_USE_UTIL_LOADER false -----------\n");
         return false;
     }
+    printf("----EGLWindow ANGLE_USE_UTIL_LOADER true -----------\n");
+
+    printf("----EGLWindow ANGLE_USE_UTIL_LOADER load egl start -----------\n");
 
     // Likely we will need to use a fallback to Library::getAs on non-ANGLE platforms.
     angle::LoadEGL(getProcAddress);
+    printf("----EGLWindow ANGLE_USE_UTIL_LOADER load egl end -----------\n");
 #endif  // defined(ANGLE_USE_UTIL_LOADER)
-
+    printf("----EGLWindow initializeDisplay 2 -----------\n");
     std::vector<EGLAttrib> displayAttributes;
     displayAttributes.push_back(EGL_PLATFORM_ANGLE_TYPE_ANGLE);
     displayAttributes.push_back(params.renderer);
@@ -133,6 +151,8 @@ bool EGLWindow::initializeDisplay(OSWindow *osWindow,
         displayAttributes.push_back(EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE);
         displayAttributes.push_back(params.deviceType);
     }
+
+    printf("----EGLWindow EGL_DONT_CARE -----------\n");
 
     if (params.presentPath != EGL_DONT_CARE)
     {

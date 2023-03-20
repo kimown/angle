@@ -121,11 +121,12 @@ EGLContext SampleApplication::getContext() const
 
 int SampleApplication::run()
 {
+    printf("----sample run-----------\n");
     if (!mOSWindow->initialize(mName, mWidth, mHeight))
     {
         return -1;
     }
-
+    printf("----sample initialize-----------\n");
     mOSWindow->setVisible(true);
 
     ConfigParameters configParams;
@@ -135,17 +136,21 @@ int SampleApplication::run()
     configParams.alphaBits   = 8;
     configParams.depthBits   = 24;
     configParams.stencilBits = 8;
+    printf("----sample initializeGL-----------\n");
 
     if (!mEGLWindow->initializeGL(mOSWindow, mEntryPointsLib.get(), mPlatformParams, configParams))
     {
         return -1;
     }
 
+    printf("----sample setSwapInterval-----------\n");
+
     // Disable vsync
     if (!mEGLWindow->setSwapInterval(0))
     {
         return -1;
     }
+    printf("----sample LoadGLES-----------\n");
 
     angle::LoadGLES(eglGetProcAddress);
 

@@ -137,7 +137,7 @@ config("extra_warnings") {
       "-Wparentheses",
       "-Wrange-loop-analysis",
       "-Wstrict-prototypes",
-      "-Wunreachable-code",
+      #"-Wunreachable-code",
     ]
   }
 }
@@ -1250,4 +1250,14 @@ if (!is_component_build && is_android &&
       ":angle_chromium_apk",
     ]
   }
+}
+
+executable("headless_example2") {
+  sources = [
+    "app/headless_example2.cc",
+  ]
+
+  deps = [
+
+  ]
 }

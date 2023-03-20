@@ -35,7 +35,7 @@ void main()
         constexpr char kFS[] = R"(precision mediump float;
 void main()
 {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
 })";
 
         mProgram = CompileProgram(kVS, kFS);
@@ -53,6 +53,7 @@ void main()
 
     void draw() override
     {
+        printf("draw ");
         GLfloat vertices[] = {
             0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
         };
