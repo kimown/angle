@@ -1256,8 +1256,12 @@ executable("headless_example2") {
   sources = [
     "app/headless_example2.cc",
   ]
-
-  deps = [
-
-  ]
+    deps = [
+      "${angle_root}:angle_util_static",
+      "${angle_root}:libANGLE",
+      "${angle_root}:libEGL_static",
+      "${angle_root}:libGLESv2_static",
+      "${angle_root}:preprocessor",
+      "${angle_root}:translator",
+    ]
 }
