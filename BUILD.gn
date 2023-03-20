@@ -1264,4 +1264,7 @@ executable("headless_example2") {
       "${angle_root}:preprocessor",
       "${angle_root}:translator",
     ]
+          libs = [
+            "X11"
+          ]
 }
