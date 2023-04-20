@@ -283,4 +283,5 @@ cat out/Debug/args.gn
 is_component_build = false
 angle_enable_swiftshader = false
 angle_enable_gl = false
+angle_enable_vulkan_validation_layers = false
 ```
