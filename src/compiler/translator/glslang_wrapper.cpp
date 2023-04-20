@@ -152,9 +152,11 @@ ANGLE_NO_DISCARD bool GlslangCompileToSpirv(const ShBuiltInResources &resources,
     shader.setEntryPoint("main");
 
 #if ANGLE_DEBUG_SPIRV_GENERATION
-    fprintf(stderr, "%s\n", shaderString);
+    fprintf(stderr, "--------------%s\n", shaderString);
 #endif  // ANGLE_DEBUG_SPIRV_GENERATION
-
+#if ANGLE_DEBUG_SPIRV_GENERATION
+    printf("print done, %s\n", shaderString);
+#endif
     bool result = shader.parse(&builtInResources, 450, ECoreProfile, false, false, messages);
     if (!result)
     {

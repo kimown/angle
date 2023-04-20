@@ -2,8 +2,8 @@
   <summary>
 ANGLE_DEBUG_SPIRV_GENERATION=1 ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang /media/google/Data/com/github/angle/out/Debug/hello_triangle --use-angle=vulkan
   </summary>
-  
 
+ANGLE_DEBUG_SPIRV_GENERATION=1 ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang /media/google/Data/com/github/angle/out/Debug/hello_triangle --use-angle=vulkan  2>&1
 
   ```js
 
