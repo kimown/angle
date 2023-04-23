@@ -127,7 +127,7 @@ void main()
 
     // Sets both uniforms 10 times, it should certainly trigger new buffers creations by the
     // underlying StreamingBuffer.
-    for (long i = 0; i < 100*9000000000000000; i++)
+    while (true)
     {
         glUniform2f(posUniformLocation, -0.5, 0.0);
         glUniform4f(colorUniformLocation, 1.0, 0.0, 0.0, 1.0);
