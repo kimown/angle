@@ -190,6 +190,7 @@ ANGLE_NO_DISCARD bool GlslangCompileToSpirv(const ShBuiltInResources &resources,
     options.optimizeSize = false;
     options.disassemble = false;
     options.validate = true;
+    options.stripDebugInfo = false;
 
     spv::SpvBuildLogger logger;
     glslang::GlslangToSpv(*intermediate, *spirvBlobOut,&logger, &options);
