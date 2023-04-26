@@ -945,7 +945,7 @@ class SpirvTransformer final : angle::NonCopyable
         gl::ShaderBitSet allStages;
         allStages.set();
         mRemoveEarlyFragmentTestsOptimization = removeEarlyFragmentTestsOptimization;
-        mRemoveDebugInfo                      = removeDebugInfo;
+        mRemoveDebugInfo                      = false;
         mBuiltinVariableInfo.activeStages     = allStages;
     }
 
@@ -1999,7 +1999,30 @@ angle::Result GlslangGetShaderSpirvCode(const GlslangErrorCallback &callback,
         }
 
         glslang::TIntermediate *intermediate = program.getIntermediate(kShLanguageMap[shaderType]);
-        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType]);
+
+        // Attach the source code to the SPIR-V for tools like RenderDoc.
+        if(shaderType == gl::ShaderType::Fragment){
+            intermediate->setSourceFile("generated233.frag");
+        } else {
+            intermediate->setSourceFile("generated233.vert");
+        }
+
+        const char *shaderString = shaderSources[shaderType].c_str();
+        int shaderLength         = static_cast<int>(shaderSources[shaderType].size());
+        intermediate->addSourceText(shaderString, shaderLength);
+
+        glslang::SpvOptions options;
+        options.generateDebugInfo = true;
+        options.disableOptimizer = true;
+        options.optimizeSize = false;
+        options.disassemble = false;
+        options.validate = true;
+
+        spv::SpvBuildLogger logger;
+
+//        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType]);
+        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType], &logger, &options);
+
     }
 
     return angle::Result::Continue;
