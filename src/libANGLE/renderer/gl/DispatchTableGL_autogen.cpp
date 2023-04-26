@@ -2789,7 +2789,7 @@ void DispatchTableGL::initProcsSharedExtensions(const std::set<std::string> &ext
 
     if (extensions.count("GL_NV_internalformat_sample_query") != 0)
     {
-        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
+//        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
     }
 
     if (extensions.count("GL_OVR_multiview") != 0)
@@ -5559,7 +5559,7 @@ void DispatchTableGL::initProcsSharedExtensionsNULL(const std::set<std::string> 
 
     if (extensions.count("GL_NV_internalformat_sample_query") != 0)
     {
-        getInternalformatSampleivNV = &glGetInternalformatSampleivNVNULL;
+//        getInternalformatSampleivNV = &glGetInternalformatSampleivNVNULL;
     }
 
     if (extensions.count("GL_OVR_multiview") != 0)
