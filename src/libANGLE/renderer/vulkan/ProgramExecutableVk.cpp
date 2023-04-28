@@ -64,7 +64,25 @@ bool ValidateTransformedSpirV(const gl::ShaderBitSet &linkedShaderStages,
                               const ShaderInterfaceVariableInfoMap &variableInfoMap,
                               const gl::ShaderMap<angle::spirv::Blob> &spirvBlobs)
 {
+    const gl::ShaderType lastPreFragmentStage = gl::GetLastPreFragmentStage(linkedShaderStages);
 
+    for (gl::ShaderType shaderType : linkedShaderStages)
+    {
+        GlslangSpirvOptions options;
+        options.shaderType                         = shaderType;
+        options.preRotation                        = SurfaceRotation::FlippedRotated90Degrees;
+        options.negativeViewportSupported          = false;
+        options.transformPositionToVulkanClipSpace = true;
+        options.removeDebugInfo                    = false;
+        options.isTransformFeedbackStage           = shaderType == lastPreFragmentStage;
+
+        angle::spirv::Blob transformed;
+        if (GlslangWrapperVk::TransformSpirV(options, variableInfoMap, spirvBlobs[shaderType],
+                                             &transformed) != angle::Result::Continue)
+        {
+            return false;
+        }
+    }
     return true;
 }
 
