@@ -48,7 +48,7 @@ const int samples = 3300;
    }
    vec4 blur1(vec2 U, vec2 scale) {
         vec4 O = vec4(0.0);
-        for ( int i = 0; i < ss*100000000; i++ ) {
+        for ( int i = 0; i < ss*1; i++ ) {
             float ccc= modI(float(i), float(s));
             vec2 d = vec2(ccc, i/s)*float(sLOD) ;
             O += gaussian(d) * vec4(1.0,1.0,1.0,1.0);
