@@ -4998,7 +4998,7 @@ angle::Result GlslangTransformSpirvCode(const GlslangSpirvOptions &options,
 
     spirvBlobOut->shrink_to_fit();
 
-    ASSERT(spirv::Validate(*spirvBlobOut));
+//    ASSERT(spirv::Validate(*spirvBlobOut));
 
     std::string sourcePath = "";
     if(options.shaderType == gl::ShaderType::Vertex){

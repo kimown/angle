@@ -285,15 +285,15 @@ ANGLE_NO_DISCARD bool GlslangCompileToSpirv(const ShBuiltInResources &resources,
         WARN() << "Internal error linking Vulkan shader:\n" << program.getInfoLog() << "\n";
     }
 
-    glslang::TIntermediate *intermediate = program.getIntermediate(language);
+//    glslang::TIntermediate *intermediate = program.getIntermediate(language);
 
     // Attach the source code to the SPIR-V for tools like RenderDoc.
-    if(language == EShLangFragment){
-        intermediate->setSourceFile("generated233.frag");
-    } else {
-        intermediate->setSourceFile("generated233.vert");
-    }
-    intermediate->addSourceText(shaderString, shaderLength);
+//    if(language == EShLangFragment){
+//        intermediate->setSourceFile("generated233.frag");
+//    } else {
+//        intermediate->setSourceFile("generated233.vert");
+//    }
+//    intermediate->addSourceText(shaderString, shaderLength);
 
     glslang::SpvOptions options;
     options.generateDebugInfo = true;
