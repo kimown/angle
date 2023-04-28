@@ -295,7 +295,7 @@ struct FeaturesVk : FeatureSetBase
     // VK_EXT_image_drm_format_modifier extensions.  These extensions are always used together to
     // implement EGL_EXT_image_dma_buf_import and EGL_EXT_image_dma_buf_import_modifiers.
     Feature supportsExternalMemoryDmaBufAndModifiers = {
-        "supportsExternalMemoryDmaBufAndModifiers", FeatureCategory::VulkanFeatures,
+        "supportsExternalMemoryDmaBufAndModifiers11111111111111111", FeatureCategory::VulkanFeatures,
         "VkDevice supports the VK_EXT_external_memory_dma_buf and VK_EXT_image_drm_format_modifier "
         "extensions",
         &members, "http://anglebug.com/6248"};

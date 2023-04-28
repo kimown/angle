@@ -2974,6 +2974,9 @@ void SpirvTransformer::resolveVariableIds()
 
         switch (opCode)
         {
+            case spv::OpString:
+                printf("ddddddddddddddd\n");
+                break ;
             case spv::OpDecorate:
                 visitDecorate(instruction);
                 break;
@@ -4992,9 +4995,23 @@ angle::Result GlslangTransformSpirvCode(const GlslangSpirvOptions &options,
         aliasingTransformer.transform();
     }
 
+
     spirvBlobOut->shrink_to_fit();
 
     ASSERT(spirv::Validate(*spirvBlobOut));
+
+    std::string sourcePath = "";
+    if(options.shaderType == gl::ShaderType::Vertex){
+        sourcePath += "1111.transform.vert.spv";
+    } else if(options.shaderType == gl::ShaderType::Fragment){
+        sourcePath += "1111.transform.frag.spv";
+    } else {
+        sourcePath += "1111.aa";
+    }
+
+    writeFile(sourcePath.c_str(), spirvBlobOut->data(), spirvBlobOut->size()*sizeof(uint32_t));
+
+
 
     return angle::Result::Continue;
 }
