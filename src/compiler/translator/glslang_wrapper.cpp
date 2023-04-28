@@ -128,8 +128,15 @@ std::vector<uint32_t> readBinaryFile(const char* filename)
 }
 
 
+int ClientID = 0;
+
 void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector<unsigned int>& spirv)
 {
+    ClientID+=1;
+    std::ostringstream sstream;
+    sstream << "select logged from login where id = " << ClientID;
+    std::string query = sstream.str();
+
     std::string sourcePath = "";
     std::string sourcePath2 = "";
     if(language == EShLangVertex){
@@ -166,26 +173,26 @@ void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector
 #endif
     }
 
-    std::ifstream file(sourcePath, std::ios::ate | std::ios::binary);
-    if (!file.is_open()) {
-        printf("err\n");
-    }
-    size_t fileSize = (size_t)file.tellg();
 
-    //spirv expects the buffer to be on uint32, so make sure to reserve an int vector big enough for the entire file
-    std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
-
-    //put file cursor at beginning
-    file.seekg(0);
-
-    //load the entire file into the buffer
-    file.read((char*)buffer.data(), fileSize);
-
-    //now that the file is loaded into the buffer, we can close it
-    file.close();
-    //    angle::spirv::Blob* spirvBlobOut2 = readBinaryFile(sourcePath2.c_str());
-
-
+//    std::ifstream file(sourcePath, std::ios::ate | std::ios::binary);
+//    if (!file.is_open()) {
+//        printf("err\n");
+//    }
+//    size_t fileSize = (size_t)file.tellg();
+//
+//    //spirv expects the buffer to be on uint32, so make sure to reserve an int vector big enough for the entire file
+//    std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
+//
+//    //put file cursor at beginning
+//    file.seekg(0);
+//
+//    //load the entire file into the buffer
+//    file.read((char*)buffer.data(), fileSize);
+//
+//    //now that the file is loaded into the buffer, we can close it
+//    file.close();
+//    //    angle::spirv::Blob* spirvBlobOut2 = readBinaryFile(sourcePath2.c_str());
+//
     // https://stackoverflow.com/questions/62713718/what-is-the-problem-with-generated-spir-v-code-and-how-to-verify-it
     std::ifstream myfile;
     myfile.open(sourcePath2, std::ios::ate | std::ios::binary);
