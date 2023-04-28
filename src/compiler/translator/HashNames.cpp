@@ -33,7 +33,11 @@ ImmutableString HashName(const ImmutableString &name, ShHashFunction64 hashFunct
 
     hashedName.appendHex(number);
 
-    return hashedName;
+    ImmutableStringBuilder hashedName233(name.length());
+    hashedName233 << name;
+
+    return hashedName233;
+//    return hashedName;
 }
 
 void AddToNameMapIfNotMapped(const ImmutableString &name,

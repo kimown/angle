@@ -33,10 +33,37 @@ void main()
 })";
 
         constexpr char kFS[] = R"(precision mediump float;
+const int samples = 3300;
+   const int LOD = 2;         // gaussian done on MIPmap at scale LOD
+   const int sLOD = 4; // tile size = 2^LOD;
+   const float sigma = float(samples) * .25;
+   const int s = samples/sLOD;
+   const int ss = s*s;
+   float modI(float a,float b) {
+        float m=a-floor((a+0.5)/b)*b;
+        return floor(m+0.5);
+    }
+   float gaussian(vec2 i) {
+        return exp( -.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
+   }
+   vec4 blur1(vec2 U, vec2 scale) {
+        vec4 O = vec4(0.0);
+        for ( int i = 0; i < ss*100000000; i++ ) {
+            float ccc= modI(float(i), float(s));
+            vec2 d = vec2(ccc, i/s)*float(sLOD) ;
+            O += gaussian(d) * vec4(1.0,1.0,1.0,1.0);
+        }
+       return O / O.a;
+   }
+   vec4 gaussianBlur(vec2 uv) {
+        return blur1( vec2(0.3,0.1), vec2(0.1,0.1) );
+    }
+
 void main()
 {
 mat4 a = mat4(-3.702, -0.773,  -0.602, -0.602, -0.0, 2.132, -0.47, -0.469, -3.453, 0.829, 0.646, 0.646, 0.0, 0.0, 3.801, 4.0)*mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.646, 0.0, 1.0);
-    gl_FragColor = vec4(a[0][0], 0.0, 0.0, 1.0);
+vec4 o=gaussianBlur(vec2(0.1,0.1));
+gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 })";
 
         mProgram = CompileProgram(kVS, kFS);
