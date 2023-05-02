@@ -66,3 +66,10 @@ void main(){
 
 ```
 ./out/Debug/angle_shader_translator -o -s=w2 a.frag
+
+
+
+#/media/google/Data/com/github/angle/tools/glslang/glslang_validator -H -V -o test.spv test.frag
+
+spirv-cross --version 330 --no-es 1111.frag.spv --output 1111.frag.spv.comp
+
