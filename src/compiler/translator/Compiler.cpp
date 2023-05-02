@@ -56,6 +56,7 @@
 #include "compiler/translator/tree_util/ReplaceShadowingVariables.h"
 #include "compiler/translator/util.h"
 
+#define ANGLE_ENABLE_FUZZER_CORPUS_OUTPUT 0
 namespace sh
 {
 
