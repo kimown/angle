@@ -23,6 +23,8 @@
 #include "libANGLE/renderer/GLImplFactory.h"
 #include "libANGLE/renderer/ShaderImpl.h"
 #include "platform/FrontendFeatures.h"
+#include <iostream>
+#include <sstream>
 
 namespace gl
 {
@@ -424,6 +426,15 @@ void Shader::resolveCompile()
     shaderStream << "\n\n";
     shaderStream << mState.mTranslatedSource;
     mState.mTranslatedSource = shaderStream.str();
+
+    std::cout << shaderStream.rdbuf();
+
+    std::ostringstream oss("Hello");
+    std::istringstream oss2("Hello");
+    std::cout << oss.rdbuf()->str() << std::endl;  // prints "Hello"
+    std::cout << oss2.rdbuf();                // prints "Hello"
+    printf("------------11111111111111, %s\n", shaderStream.rdbuf()->str().c_str());
+    printf("------------11111111111111\n");
 #endif  // !defined(NDEBUG)
 
     // Gather the shader information
