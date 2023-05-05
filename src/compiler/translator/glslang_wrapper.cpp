@@ -164,14 +164,14 @@ void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector
         system("glslc  1111.vert -o 1111.vert.spv -g");
 #else
         system("/media/google/Data/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.vert -o 1111.vert.spv -gVS");
-//        system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.vert -o 1111.vert.spv -gVS");
+        system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.vert -o 1111.vert.spv -gVS");
 #endif
     } else if(language == EShLangFragment){
 #ifdef _WIN32
         system("glslc  1111.frag -o 1111.frag.spv -g");
 #else
         system("/media/google/Data/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.frag -o 1111.frag.spv -gVS");
-//        system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.frag -o 1111.frag.spv -gVS");
+        system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.frag -o 1111.frag.spv -gVS");
 #endif
     }
 
