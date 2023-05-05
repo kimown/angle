@@ -77,6 +77,7 @@ gclient sync
 
 gn gen out/Debug
 gn args out/Debug/
+mkdir -p out/Debug/corpus
 
 ```angular2html
 angle_enable_vulkan_validation_layers = false
