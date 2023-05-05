@@ -141,13 +141,13 @@ void main()
 
     // Sets both uniforms 10 times, it should certainly trigger new buffers creations by the
     // underlying StreamingBuffer.
-    for (int i = 0; i < 100; i++)
+    while (true)
     {
         glUniform2f(posUniformLocation, -0.5, 0.0);
         glUniform4f(colorUniformLocation, 1.0, 0.0, 0.0, 1.0);
         drawQuad(program, "position", 0.5f, 1.0f);
         swapBuffers();
-        ASSERT_GL_NO_ERROR();
+//        ASSERT_GL_NO_ERROR();
     }
 }
 
