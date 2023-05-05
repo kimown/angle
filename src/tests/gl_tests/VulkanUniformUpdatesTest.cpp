@@ -117,7 +117,9 @@ void main()
 {
     int a=0;
     int b=a+1;
-    gl_Position = vec4(position + uniPosModifier, a, b);
+mat4 aa = mat4(-3.702, -0.773,  -0.602, -0.602, -0.0, 2.132, -0.47, -0.469, -3.453, 0.829, 0.646, 0.646, 0.0, 0.0, 3.801, 4.0)*mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.646, 0.0, 1.0);
+
+    gl_Position = vec4(position + uniPosModifier, a, aa[0][0]);
 })";
 
     constexpr char kColorUniformFragmentShader[] = R"(precision mediump float;
