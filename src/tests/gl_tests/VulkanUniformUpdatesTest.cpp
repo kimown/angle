@@ -115,7 +115,9 @@ TEST_P(VulkanUniformUpdatesTest, UpdateUntilNewBufferIsAllocated)
 uniform vec2 uniPosModifier;
 void main()
 {
-    gl_Position = vec4(position + uniPosModifier, 0, 1);
+    int a=0;
+    int b=a+1;
+    gl_Position = vec4(position + uniPosModifier, a, b);
 })";
 
     constexpr char kColorUniformFragmentShader[] = R"(precision mediump float;
