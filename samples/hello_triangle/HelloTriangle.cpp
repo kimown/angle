@@ -27,9 +27,9 @@ class HelloTriangleSample : public SampleApplication
     bool initialize() override
     {
         constexpr char kVS[] = R"(attribute vec4 vPosition;
+float a=1.0;
 void main()
 {
-    float a=1.0;
     float b=0.5;
     float c = a-b;
     gl_Position = vec4(vPosition.x,vPosition.y,vPosition.z, c+0.1);
