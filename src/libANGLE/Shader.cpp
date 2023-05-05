@@ -9,7 +9,7 @@
 // functionality. [OpenGL ES 2.0.24] section 2.10 page 24 and section 3.8 page 84.
 
 #include "libANGLE/Shader.h"
-
+#include <iostream>
 #include <functional>
 #include <sstream>
 
@@ -464,6 +464,8 @@ void Shader::resolveCompile()
         shaderStream << "\n\n";
         shaderStream << mState.mTranslatedSource;
         mState.mTranslatedSource = shaderStream.str();
+        printf("------------11111111111111, %s\n", shaderStream.rdbuf()->str().c_str());
+        printf("------------11111111111111\n");
 #endif  // !defined(NDEBUG)
     }
 

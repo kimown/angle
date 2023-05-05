@@ -73,3 +73,14 @@ void main(){
 
 spirv-cross --version 330 --no-es 1111.frag.spv --output 1111.frag.spv.comp
 
+gclient sync
+
+gn gen out/Debug
+gn args out/Debug/
+
+```angular2html
+angle_enable_vulkan_validation_layers = false
+angle_enable_gl = false
+angle_enable_swiftshader = false
+```
+ninja -C out/Debug
