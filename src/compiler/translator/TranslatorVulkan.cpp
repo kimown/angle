@@ -1377,12 +1377,12 @@ bool TranslatorVulkan::translate(TIntermBlock *root,
         // infer the wrong precisions.  The following transformation gives constants names with
         // precision to guide glslang.  This is not an issue for SPIR-V generation because the
         // precision information is present in the tree already.
-        if (!RecordConstantPrecision(this, root, &getSymbolTable()))
-        {
-            return false;
-        }
+//        if (!RecordConstantPrecision(this, root, &getSymbolTable()))
+//        {
+//            return false;
+//        }
 
-        const bool enablePrecision = (compileOptions & SH_IGNORE_PRECISION_QUALIFIERS) == 0;
+        const bool enablePrecision = false;
 
         // Write translated shader.
         TOutputVulkanGLSL outputGLSL(this, sink, enablePrecision, compileOptions);

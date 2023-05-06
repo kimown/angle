@@ -60,10 +60,10 @@ std::shared_ptr<WaitableCompileEvent> ShaderVk::compile(const gl::Context *conte
         compileOptions |= SH_EMULATE_SEAMFUL_CUBE_MAP_SAMPLING;
     }
 
-    if (!contextVk->getFeatures().enablePrecisionQualifiers.enabled)
-    {
+//    if (!contextVk->getFeatures().enablePrecisionQualifiers.enabled)
+//    {
         compileOptions |= SH_IGNORE_PRECISION_QUALIFIERS;
-    }
+//    }
 
     if (contextVk->getFeatures().forceFragmentShaderPrecisionHighpToMediump.enabled)
     {
