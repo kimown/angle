@@ -2183,14 +2183,7 @@ TIntermTyped *TIntermBinary::fold(TDiagnostics *diagnostics)
             {
                 return this;
             }
-            const TConstantUnion *constArray =
-                TIntermConstantUnion::FoldBinary(mOp, leftConstant, mLeft->getType(), rightConstant,
-                                                 mRight->getType(), diagnostics, mLeft->getLine());
-            if (!constArray)
-            {
-                return this;
-            }
-            return CreateFoldedNode(constArray, this);
+            return this;
         }
     }
 }

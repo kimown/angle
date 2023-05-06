@@ -1033,6 +1033,11 @@ bool TCompiler::checkAndSimplifyAST(TIntermBlock *root,
     // Exception: if EXT_shader_non_constant_global_initializers is enabled, we must generate global
     // initializers before we generate the DAG, since initializers may call functions which must not
     // be optimized out
+    if(enableNonConstantInitializers){
+        printf("enableNonConstantInitializers:true");
+    }else{
+        printf("enableNonConstantInitializers:false");
+    }
     if (!enableNonConstantInitializers &&
         !DeferGlobalInitializers(this, root, initializeLocalsAndGlobals, canUseLoopsToInitialize,
                                  highPrecisionSupported, forceDeferGlobalInitializers,
