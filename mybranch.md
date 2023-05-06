@@ -87,3 +87,7 @@ angle_enable_swiftshader = false
 ninja -C out/Debug
 
 ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_ENABLE_FUZZER_CORPUS_OUTPUT=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang:forceDriverUniformOverSpecConst;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug
+
+./angle_unittests --gtest_list_tests > a.txt
+
+./angle_unittests --gtest_filter=*RecordConstantPrecisionTest.HigherPrecisionConstantAsParameter*

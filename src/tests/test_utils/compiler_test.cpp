@@ -84,9 +84,15 @@ bool compileTestShader(GLenum type,
     if (translatedCode)
     {
         *translatedCode = infoSink.obj.isBinary() ? kBinaryBlob : infoSink.obj.c_str();
+        if(infoSink.obj.isBinary()){
+            printf("---------->>>>>>>>>>>binary:true");
+        } else{
+            printf("---------->>>>>>>>>>>binary:false%s",infoSink.obj.c_str());
+        }
     }
     if (infoLog)
     {
+//        printf("---------->>>>>>>>>>>%s",infoSink.info.c_str());
         *infoLog = infoSink.info.c_str();
     }
     SafeDelete(translator);
@@ -130,7 +136,8 @@ ShBuiltInResources *MatchOutputCodeTest::getResources()
 
 void MatchOutputCodeTest::compile(const std::string &shaderString)
 {
-    compile(shaderString, mDefaultCompileOptions);
+    const ShCompileOptions compileOptions2 = mDefaultCompileOptions|SH_IGNORE_PRECISION_QUALIFIERS;
+    compile(shaderString, compileOptions2);
 }
 
 void MatchOutputCodeTest::compile(const std::string &shaderString,
