@@ -91,3 +91,27 @@ ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_ENABLE_FUZZER_CORPUS_OUTPUT=1;ANGLE_FEATURE
 ./angle_unittests --gtest_list_tests > a.txt
 
 ./angle_unittests --gtest_filter=*RecordConstantPrecisionTest.HigherPrecisionConstantAsParameter*
+
+
+
+-----
+/media/google/Data/com/github/angle/out/Debug/hello_triangle
+--use-angle=vulkan
+ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_ENABLE_FUZZER_CORPUS_OUTPUT=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang:enablePrecisionQualifiers;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug
+
+/media/google/Data/com/github/angle/out/Debug/angle_shader_translator
+-o a.frag
+/media/google/Data/com/github/angle
+ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang:forceDriverUniformOverSpecConst;forceDriverUniformOverSpecConst=1;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug;ANGLE_ENABLE_FUZZER_CORPUS_OUTPUT=1
+
+/media/google/Data/com/github/angle/out/Debug/angle_white_box_tests
+--gtest_filter=*VulkanUniformUpdatesTest.UpdateUntilNewBufferIsAllocated/ES2_Vulkan*  --gtest_repeat=-1
+ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug
+
+/media/google/Data/com/github/angle/out/Debug/angle_unittests
+--gtest_filter=*RecordConstantPrecisionTest.HigherPrecisionConstantAsParameter*
+ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug
+
+/media/google/Data/com/github/angle/out/Debug/headless_example2
+-----
+
