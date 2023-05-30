@@ -108,7 +108,11 @@ void DumpFuzzerCase(char const *const *shaderStrings,
                     uint64_t options)
 {
     static int fileIndex = 0;
-
+#ifdef _WIN32
+    system("echo mkdir -p corpus");
+#else
+    system("pwd && mkdir -p corpus");
+#endif
     std::ostringstream o = sh::InitializeStream<std::ostringstream>();
     o << "corpus/" << fileIndex++ << ".sample";
     std::string s = o.str();
