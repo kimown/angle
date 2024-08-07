@@ -9,6 +9,7 @@
 #include <vector>
 #include "test_utils/ANGLETest.h"
 #include "test_utils/gl_raii.h"
+#include "util/test_utils.h"
 
 using namespace angle;
 
@@ -3962,7 +3963,13 @@ void main()
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, shaderStorageBuffer);
     EXPECT_GL_NO_ERROR();
 
-    glDispatchCompute(1, 1, 1);
+
+    while(true){
+        angle::Sleep(100);
+        glDispatchCompute(1, 1, 1);
+    }
+
+
     glFinish();
     EXPECT_GL_NO_ERROR();
 

@@ -16,6 +16,7 @@
 #include "SampleApplication.h"
 #include <stdio.h>
 #include "util/shader_utils.h"
+#include "util/test_utils.h"
 
 class HelloTriangleSample : public SampleApplication
 {
@@ -85,7 +86,8 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 
     void draw() override
     {
-        system("sleep 3");
+        angle::Sleep(1000);
+//        system("sleep 3");
         GLfloat vertices[] = {
             0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
         };

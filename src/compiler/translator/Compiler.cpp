@@ -1038,9 +1038,9 @@ bool TCompiler::checkAndSimplifyAST(TIntermBlock *root,
     // initializers before we generate the DAG, since initializers may call functions which must not
     // be optimized out
     if(enableNonConstantInitializers){
-        printf("enableNonConstantInitializers:true");
+        printf("enableNonConstantInitializers:true\n");
     }else{
-        printf("enableNonConstantInitializers:false");
+        printf("enableNonConstantInitializers:false\n");
     }
     if (!enableNonConstantInitializers &&
         !DeferGlobalInitializers(this, root, initializeLocalsAndGlobals, canUseLoopsToInitialize,
