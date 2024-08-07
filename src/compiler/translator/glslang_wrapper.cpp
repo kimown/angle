@@ -146,7 +146,8 @@ void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector
         sourcePath += "1111.frag";
         sourcePath2 += "1111.frag.spv";
     } else {
-        sourcePath += "1111.aa";
+        sourcePath += "1111.comp";
+        sourcePath2 += "1111.comp.spv";
     }
 
     std::ostringstream stream;
@@ -172,6 +173,13 @@ void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector
 #else
         system("/media/google/Data/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.frag -o 1111.frag.spv -gVS");
         system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.frag -o 1111.frag.spv -gVS");
+#endif
+    } else {
+#ifdef _WIN32
+        system("glslc  1111.comp -o 1111.comp.spv -g");
+#else
+        system("/media/google/Data/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.comp -o 1111.comp.spv -gVS");
+        system("/home/h/com/mdk/1.3.243.0/x86_64/bin/glslangValidator -V  1111.comp -o 1111.comp.spv -gVS");
 #endif
     }
 
@@ -200,7 +208,7 @@ void GlslangToSpv233(EShLanguage language, const char* shaderString, std::vector
     myfile.open(sourcePath2, std::ios::ate | std::ios::binary);
     if (!myfile.is_open())
     {
-        std::cout << "File not found" << std::endl;
+        std::cout << "File not found" << sourcePath2 << std::endl;
     }
 
     auto size = myfile.tellg();
