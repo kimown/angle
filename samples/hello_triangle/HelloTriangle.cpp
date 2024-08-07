@@ -59,6 +59,7 @@ void renderDocTriggerCaptureEnd() {
     }
 }
 
+bool inited = false;
 
 class HelloTriangleSample : public SampleApplication
 {
@@ -131,7 +132,13 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 
     void draw() override
     {
+
         angle::Sleep(100);
+        if(inited) {
+        } else {
+            renderDocTriggerCapture();
+            inited = true;
+        }
 //        system("sleep 1");
         GLfloat vertices[] = {
             0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
@@ -160,7 +167,6 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 int main(int argc, char **argv)
 {
     loadRenderDoc();
-    renderDocTriggerCapture();
     HelloTriangleSample app(argc, argv);
     return app.run();
 }
