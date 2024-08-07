@@ -131,8 +131,8 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 
     void draw() override
     {
-        angle::Sleep(1000);
-        system("sleep 1");
+        angle::Sleep(100);
+//        system("sleep 1");
         GLfloat vertices[] = {
             0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
         };
