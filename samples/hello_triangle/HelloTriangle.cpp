@@ -80,7 +80,7 @@ void main()
 
         constexpr char kFS[] = R"(precision mediump float;
 const highp float a = 4096.5;
-const int samples = 3300;
+const int samples = 100;
    const int LOD = 2;         // gaussian done on MIPmap at scale LOD
    const int sLOD = 4; // tile size = 2^LOD;
    const float sigma = float(samples) * .25;
