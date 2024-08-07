@@ -22,6 +22,7 @@
 #include "test_utils/gl_raii.h"
 #include "util/EGLWindow.h"
 #include "util/shader_utils.h"
+#include "util/test_utils.h"
 
 using namespace angle;
 
@@ -129,6 +130,7 @@ void main()
     // underlying StreamingBuffer.
     while (true)
     {
+        angle::Sleep(100);
         glUniform2f(posUniformLocation, -0.5, 0.0);
         glUniform4f(colorUniformLocation, 1.0, 0.0, 0.0, 1.0);
         drawQuad(program, "position", 0.5f, 1.0f);
