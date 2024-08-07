@@ -18,6 +18,48 @@
 #include "util/shader_utils.h"
 #include "util/test_utils.h"
 
+#include "/media/google/Data/com/github/renderdoc/renderdoc/api/app/renderdoc_app.h"
+#include <stddef.h>
+#include <dlfcn.h>
+#include <assert.h>
+#include <stdio.h>
+RENDERDOC_API_1_1_2 *rdoc_api = NULL;
+
+void loadRenderDoc() {
+    void* mod = dlopen("/media/google/Data/com/github/renderdoc/build/lib/librenderdoc.so", RTLD_NOW | RTLD_NOLOAD);
+    if(mod == NULL)
+    {
+        printf("mod failed\n");
+    } else{
+        printf("mod ok\n");
+        pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)dlsym(mod, "RENDERDOC_GetAPI");
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void **)&rdoc_api);
+        printf("ret, %d\n",ret);
+        assert(ret == 1);
+        rdoc_api->SetCaptureFilePathTemplate("dist/example");
+        printf("-----init done\n");
+    }
+}
+
+void renderDocTriggerCapture() {
+    if(rdoc_api){
+        rdoc_api->StartFrameCapture(NULL, NULL);
+        printf("renderDocTriggerCapture\n");
+    } else {
+        printf("rdoc_api not ready\n");
+    }
+}
+
+void renderDocTriggerCaptureEnd() {
+    if(rdoc_api) {
+        rdoc_api->EndFrameCapture(NULL, NULL);
+        printf("renderDocTriggerCaptureEnd\n");
+    } else{
+        printf("rdoc_api not ready\n");
+    }
+}
+
+
 class HelloTriangleSample : public SampleApplication
 {
   public:
@@ -82,12 +124,15 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
         return true;
     }
 
-    void destroy() override { glDeleteProgram(mProgram); }
+    void destroy() override {
+        glDeleteProgram(mProgram);
+        renderDocTriggerCaptureEnd();
+    }
 
     void draw() override
     {
         angle::Sleep(1000);
-//        system("sleep 3");
+        system("sleep 1");
         GLfloat vertices[] = {
             0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
         };
@@ -114,6 +159,8 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 
 int main(int argc, char **argv)
 {
+    loadRenderDoc();
+    renderDocTriggerCapture();
     HelloTriangleSample app(argc, argv);
     return app.run();
 }
