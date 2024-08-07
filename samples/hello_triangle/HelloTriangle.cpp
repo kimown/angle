@@ -166,22 +166,6 @@ void main()
             inited = true;
         }
 
-//
-//        if (getenv("stdout_alpha")) {
-//            glUseProgram(mProgramCompute);
-//            constexpr unsigned int kBytesPerComponent = sizeof(GLuint);
-//            angle::GLBuffer shaderStorageBuffer;
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, shaderStorageBuffer);
-//            glBufferData(GL_SHADER_STORAGE_BUFFER, 1 * kBytesPerComponent, nullptr, GL_STATIC_DRAW);
-//            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, shaderStorageBuffer);
-//            glDispatchCompute(1, 1, 1);
-//            const GLint *ptr = reinterpret_cast<const GLint *>(
-//                glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 1 * kBytesPerComponent, GL_MAP_READ_BIT));
-//            int a = ptr[0];
-//            printf("aaa %d\n",a);
-//            //        EXPECT_EQ(499500, );
-//
-//        }
 
         glUseProgram(mProgram);
         {
@@ -204,6 +188,24 @@ void main()
             glEnableVertexAttribArray(0);
 
             glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+
+
+
+        if (getenv("stdout_alpha")) {
+            glUseProgram(mProgramCompute);
+            constexpr unsigned int kBytesPerComponent = sizeof(GLuint);
+            angle::GLBuffer shaderStorageBuffer;
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, shaderStorageBuffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, 1 * kBytesPerComponent, nullptr, GL_STATIC_DRAW);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, shaderStorageBuffer);
+            glDispatchCompute(1, 1, 1);
+            const GLint *ptr = reinterpret_cast<const GLint *>(
+                glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 1 * kBytesPerComponent, GL_MAP_READ_BIT));
+            int a = ptr[0];
+            printf("aaa %d\n",a);
+            //        EXPECT_EQ(499500, );
+
         }
     }
 
