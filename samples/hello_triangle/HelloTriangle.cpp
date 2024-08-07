@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "util/shader_utils.h"
 #include "util/test_utils.h"
+#include "/media/google/Data/com/github/angle/src/tests/test_utils/gl_raii.h"
 
 #include "/media/google/Data/com/github/renderdoc/renderdoc/api/app/renderdoc_app.h"
 #include <stddef.h>
@@ -114,20 +115,45 @@ vec4 o=gaussianBlur(vec2(0.1,0.1));
 gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
 })";
 
+        constexpr char kComputeShader[] = R"(#version 310 es
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(binding = 0, std430) buffer Output {
+  int value[1];
+} output_data;
+void main()
+{
+    int values[1000];
+    for (int i = 0; i < values.length(); i++)
+    {
+        values[i] = 0;
+    }
+    int total = 0;
+    for (int i = 0; i < values.length(); i++)
+    {
+        total += i;
+        values[i] = total;
+    }
+    output_data.value[0u] = values[1000-1];
+})";
+        mProgramCompute = CompileComputeProgram(kComputeShader);
+
+
         mProgram = CompileProgram(kVS, kFS);
+
+
         if (!mProgram)
         {
             return false;
         }
 
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         return true;
     }
 
     void destroy() override {
         glDeleteProgram(mProgram);
-        renderDocTriggerCaptureEnd();
+//            renderDocTriggerCaptureEnd();
     }
 
     void draw() override
@@ -136,37 +162,59 @@ gl_FragColor = vec4(a[0][0], o.x, 0.0, 1.0);
         angle::Sleep(100);
         if(inited) {
         } else {
-            renderDocTriggerCapture();
+//                renderDocTriggerCapture();
             inited = true;
         }
-//        system("sleep 1");
-        GLfloat vertices[] = {
-            0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
-        };
 
-        // Set the viewport
-        glViewport(0, 0, getWindow()->getWidth(), getWindow()->getHeight());
+//
+//        if (getenv("stdout_alpha")) {
+//            glUseProgram(mProgramCompute);
+//            constexpr unsigned int kBytesPerComponent = sizeof(GLuint);
+//            angle::GLBuffer shaderStorageBuffer;
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, shaderStorageBuffer);
+//            glBufferData(GL_SHADER_STORAGE_BUFFER, 1 * kBytesPerComponent, nullptr, GL_STATIC_DRAW);
+//            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, shaderStorageBuffer);
+//            glDispatchCompute(1, 1, 1);
+//            const GLint *ptr = reinterpret_cast<const GLint *>(
+//                glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 1 * kBytesPerComponent, GL_MAP_READ_BIT));
+//            int a = ptr[0];
+//            printf("aaa %d\n",a);
+//            //        EXPECT_EQ(499500, );
+//
+//        }
 
-        // Clear the color buffer
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Use the program object
         glUseProgram(mProgram);
+        {
+            //        system("sleep 1");
+            GLfloat vertices[] = {
+                0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
+            };
 
-        // Load the vertex data
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-        glEnableVertexAttribArray(0);
+            // Set the viewport
+            glViewport(0, 0, getWindow()->getWidth(), getWindow()->getHeight());
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+            // Clear the color buffer
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // Use the program object
+            glUseProgram(mProgram);
+
+            // Load the vertex data
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+            glEnableVertexAttribArray(0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
     }
 
   private:
     GLuint mProgram;
+    GLuint mProgramCompute;
 };
 
 int main(int argc, char **argv)
 {
-    loadRenderDoc();
+//        loadRenderDoc();
     HelloTriangleSample app(argc, argv);
     return app.run();
 }

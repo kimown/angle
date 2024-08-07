@@ -307,8 +307,10 @@ ANGLE_NO_DISCARD bool GlslangCompileToSpirv(const ShBuiltInResources &resources,
     // Attach the source code to the SPIR-V for tools like RenderDoc.
 //    if(language == EShLangFragment){
 //        intermediate->setSourceFile("generated233.frag");
-//    } else {
+//    } else if(language == EShLangVertex){
 //        intermediate->setSourceFile("generated233.vert");
+//    } else {
+//        intermediate->setSourceFile("generated233.comp");
 //    }
 //    intermediate->addSourceText(shaderString, shaderLength);
 
