@@ -1,3 +1,6 @@
+ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang;ANGLE_DEBUG_SPIRV_GENERATION=1;LD_LIBRARY_PATH=/media/google/Data/com/github/angle;stdout_alpha=1 /media/google/Data/com/github/angle/out/Debug/hello_triangle
+
+
 google@h:/media/google/Data/com/github/angle$ ANGLE_DEBUG_SPIRV_GENERATION=1;ANGLE_FEATURE_OVERRIDES_ENABLED=generateSPIRVThroughGlslang;LD_LIBRARY_PATH=/media/google/Data/com/github/angle/out/Debug /media/google/Data/com/github/angle/out/Debug/angle_end2end_tests --gtest_filter=*ComputeShaderTest*  
 2 GPUs:
 0 - Intel device id: 0x9BC5
