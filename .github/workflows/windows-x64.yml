@@ -10,10 +10,14 @@ jobs:
     steps:
       - name: Install Python 2
         run: choco install python2
-      - name: Checkout sources
+      - name: Check python2
+        shell: cmd
         run: |
           set PATH=C:\Python27;%cd%\depot_tools;%PATH%
           cmd /c python --version
+      - name: Checkout sources
+        run: |
+
           git clone https://github.com/google/angle .
           git checkout b44af6625286df933a688779d139ec33cd3e492a
       - name: Fetch depot_tools
