@@ -45,7 +45,7 @@ jobs:
           find angle-windows-x64 -name ".clang-format" -delete
           find angle-windows-x64 -name "*.md" -delete
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: angle-windows-x64
           path: angle-windows-x64
