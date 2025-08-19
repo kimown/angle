@@ -6,10 +6,13 @@ on:
 
 jobs:
   build-windows-x64:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
+      - name: Install Python 2
+        run: choco install python2
       - name: Checkout sources
         run: |
+          cmd /c python --version
           git clone https://github.com/google/angle .
           git checkout b44af6625286df933a688779d139ec33cd3e492a
       - name: Fetch depot_tools
