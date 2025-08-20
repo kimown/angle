@@ -27,12 +27,11 @@ jobs:
           cmd /c python --version
           set PATH=C:\Python27;%cd%\depot_tools;%PATH%
           cmd /c python --version
-          python scripts/bootstrap.py
       - name: Checkout sources
         run: |
           git clone https://github.com/google/angle .
           git checkout b44af6625286df933a688779d139ec33cd3e492a
-      - name: Check python2
+      - name: RUN python2
         shell: cmd
         run: |
           cmd /c python --version
