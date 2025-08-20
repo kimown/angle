@@ -27,6 +27,7 @@ jobs:
           cmd /c python --version
           set PATH=C:\Python27;%cd%\depot_tools;%PATH%
           cmd /c python --version
+          python scripts/bootstrap.py
       - name: Checkout sources
         run: |
           
