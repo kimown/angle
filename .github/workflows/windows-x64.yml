@@ -8,10 +8,21 @@ jobs:
   build-windows-x64:
     runs-on: windows-2022
     steps:
-      - name: Clean1
+      - name: info1
         shell: cmd
         run: |
           cmd /c "echo hello_clean1"
+      - name: info2
+        shell: bash
+        run: |
+          echo hello_clean2
+          ls 
+          pwd
+          echo hello_clean2
+      - name: Checkout sources
+        run: |
+          git clone https://github.com/kimown/angle .
+          git checkout mybranch87_0_4272_0
       - name: Fetchfea depot_tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
