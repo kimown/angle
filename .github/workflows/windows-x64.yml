@@ -54,13 +54,19 @@ jobs:
           set DEPOT_TOOLS_WIN_TOOLCHAIN=0
           set vs2019_install=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community
           set WINDOWSSDKDIR=C:\Program Files (x86)\Windows Kits\10
-          cmd /c gclient
-          cmd /c python scripts/bootstrap.py
-          set PYTHONPATH=%cd%\build;%PYTHONPATH%
           cmd /c python -c "import sys;import os;print(sys.path);print(os.environ['PYTHONPATH'])"
+          cmd /c "echo gclient_start"
+          cmd /c gclient
+          cmd /c "echo gclient_end"
+          cmd /c python scripts/bootstrap.py
+          cmd /c "echo bootstrap_end"
+          set PYTHONPATH=%cd%\build;%PYTHONPATH%
           cmd /c gclient sync
+          cmd /c "echo sync_end"
           cmd /c gn gen out/Release --args="is_debug=false target_cpu=\"x64\" angle_build_all=false"
+          cmd /c "echo gen_end"
           cmd /c autoninja -C out/Release
+          cmd /c "echo ninja_end"
       - name: Pack
         shell: bash
         run: |
