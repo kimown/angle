@@ -24,6 +24,7 @@ jobs:
           echo hello_clean2
           ls 
           pwd
+          rm -rf *
           echo hello_clean2
       - name: Checkout sources
         run: |
