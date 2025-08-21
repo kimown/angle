@@ -4,6 +4,9 @@ on:
   push:
     branches: [ mybranch87_0_4272_0 ]
 
+env:
+  PYTHONPATH: D:\a\angle\angle\build;
+
 jobs:
   build-windows-x64:
     runs-on: windows-2022
