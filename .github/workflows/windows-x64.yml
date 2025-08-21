@@ -45,6 +45,7 @@ jobs:
           ls 
           pwd
           ls "/d/a/angle/angle/python3"
+          ls "/d/a/angle/angle/build"
       - name: Build
         shell: cmd
         run: |
@@ -56,6 +57,7 @@ jobs:
           set WINDOWSSDKDIR=C:\Program Files (x86)\Windows Kits\10
           cmd /c gclient
           cmd /c python scripts/bootstrap.py
+          set PYTHONPATH=%cd%\build
           cmd /c gclient sync
           cmd /c gn gen out/Release --args="is_debug=false target_cpu=\"x64\" angle_build_all=false"
           cmd /c autoninja -C out/Release
