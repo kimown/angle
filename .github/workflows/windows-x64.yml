@@ -14,10 +14,10 @@ jobs:
           cmd /c "echo hello_clean1"
       - name: Install Required Dependencies
         if: true
+        shell: cmd
         run: |
           curl -sOL https://aka.ms/vs/16/release/vs_community.exe
-          start /w vs_community.exe --passive --wait --norestart --nocache --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community" --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-          del /q vs_community.exe
+          .\vs_community.exe --passive --wait --norestart --nocache --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community" --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
       - name: info2
         shell: bash
         run: |
