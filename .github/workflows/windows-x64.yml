@@ -34,11 +34,22 @@ jobs:
       - name: Fetchfea depot_tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+      - name: Install Python3 to D
+        shell: cmd
+        run: |
+          choco install python3 --params "/InstallDir:D:\a\angle\angle\python3" -y
+          dir D:\a\angle\angle\python3
+      - name: info3
+        shell: bash
+        run: |
+          ls 
+          pwd
+          ls "/d/a/angle/angle/python3"
       - name: Build
         shell: cmd
         run: |
           cmd /c python --version
-          set PATH=%cd%\depot_tools;%PATH%
+          set PATH=%cd%\python3;%cd%\depot_tools;%PATH%
           cmd /c python --version
           set DEPOT_TOOLS_WIN_TOOLCHAIN=0
           set vs2019_install=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community
