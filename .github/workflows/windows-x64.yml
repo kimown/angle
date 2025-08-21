@@ -47,6 +47,8 @@ jobs:
           ls "/d/a/angle/angle/python3"
       - name: Build
         shell: cmd
+        env:
+          PYTHONPATH: D:\a\angle\angle\build;
         run: |
           cmd /c python --version
           set PATH=%cd%\python3;%cd%\depot_tools;%PATH%
