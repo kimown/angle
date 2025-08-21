@@ -45,7 +45,6 @@ jobs:
           ls 
           pwd
           ls "/d/a/angle/angle/python3"
-          ls "/d/a/angle/angle/build"
       - name: Build
         shell: cmd
         run: |
