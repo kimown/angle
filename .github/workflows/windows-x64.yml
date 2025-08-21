@@ -35,10 +35,10 @@ jobs:
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
       - name: Install Python3 to D
-        shell: cmd
         run: |
-          choco install python3 --params "/InstallDir:D:\a\angle\angle\python3" -y
-          dir D:\a\angle\angle\python3
+          curl -LO https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip
+          mkdir D:\a\angle\angle\python3
+          powershell -Command "Expand-Archive -Path python-3.11.9-embed-amd64.zip -DestinationPath D:\a\angle\angle\python3"
       - name: info3
         shell: bash
         run: |
