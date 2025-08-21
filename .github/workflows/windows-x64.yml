@@ -25,6 +25,7 @@ jobs:
           ls 
           pwd
           rm -rf *
+          ls "/c/Program Files (x86)/Microsoft Visual Studio/2019/Community"
           echo hello_clean2
       - name: Checkout sources
         run: |
