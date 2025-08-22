@@ -39,15 +39,15 @@ jobs:
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
       - name: Install Python3 to D
         run: |
-          curl -LO https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip
+          curl -LO https://github.com/ServBay/Python-Windows-Portable/releases/download/python-3.9.13-win-x64/python-3.9.13-win-x64.zip
           mkdir D:\a\angle\angle\python3
-          powershell -Command "Expand-Archive -Path python-3.11.9-embed-amd64.zip -DestinationPath D:\a\angle\angle\python3"
+          powershell -Command "Expand-Archive -Path python-3.9.13-win-x64.zip -DestinationPath D:\a\angle\angle\python3"
       - name: info3
         shell: bash
         run: |
           ls 
           pwd
-          ls "/d/a/angle/angle/python3"
+          ls "/d/a/angle/angle/python3/x64"
       - name: Build
         if: false
         shell: cmd
@@ -55,7 +55,7 @@ jobs:
           PYTHONPATH: D:\a\angle\angle\build;
         run: |
           cmd /c python --version
-          set PATH=%cd%\python3;%cd%\depot_tools;%PATH%
+          set PATH=%cd%\python3\x64;%cd%\depot_tools;%PATH%
           set PYTHONPATH=%cd%\build;%PYTHONPATH%
           cmd /c python --version
           set DEPOT_TOOLS_WIN_TOOLCHAIN=0
@@ -94,10 +94,10 @@ jobs:
           echo "gclient_end"
           python scripts/bootstrap.py
           echo "bootstrap_end"
-          refreshenv
+          
           gclient sync
           echo "sync_end"
-          gn gen out/Release --args="is_debug=false target_cpu=\"x64\" angle_build_all=false"
+          gn gen out/Release --args="is_debug=false target_cpu=x64 angle_build_all=false"
           echo "gen_end"
           autoninja -C out/Release
           echo "ninja_end"          
