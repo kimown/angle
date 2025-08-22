@@ -1,0 +1,32 @@
+Subject: [PATCH] Fix `gn gen` with python3 and the Windows toolchain on a other drive.
+
+In python3 map() return an iterable but doesn't actually do the map yet,
+so the exception for the file being on another drive was produced in
+code later and not caught. Force the expansion of the iterable using
+list(map(...)).
+
+Bug: 941669
+Change-Id: I4f56f25a42cab102f4cd2f988907a60ec7e816af
+Reviewed-on: https://chromium-review.googlesource.com/c/chromium/src/+/2517583
+Reviewed-by: Nico Weber <thakis@chromium.org>
+Commit-Queue: Nico Weber <thakis@chromium.org>
+Cr-Commit-Position: refs/heads/master@{#823980}
+GitOrigin-RevId: 2cdeef7a12e2dafc6f5a314c5d7d22da04c4c92e
+---
+Index: toolchain/win/setup_toolchain.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/win/setup_toolchain.py b/toolchain/win/setup_toolchain.py
+--- a/toolchain/win/setup_toolchain.py	(revision 17c874b04c8ab995726174afdc360f1adfd79549)
++++ b/toolchain/win/setup_toolchain.py	(revision 02d08c96f86df7bf0a4a1414c8d4047888617883)
+@@ -269,7 +269,7 @@
+       lib = [p.replace('"', r'\"') for p in env['LIB'].split(';') if p]
+       # Make lib path relative to builddir when cwd and sdk in same drive.
+       try:
+-        lib = map(os.path.relpath, lib)
++        lib = list(map(os.path.relpath, lib))
+       except ValueError:
+         pass
+ 
