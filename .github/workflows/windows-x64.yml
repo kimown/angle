@@ -69,7 +69,7 @@ jobs:
           cmd /c "echo bootstrap_end"
           cmd /c gclient sync
           cmd /c "echo sync_end"
-          cmd /c gn gen out/Release --args="is_debug=false target_cpu=\"x64\" angle_build_all=false"
+          cmd /c gn gen out/Release --args="is_debug=false angle_build_all=false"
           cmd /c "echo gen_end"
           cmd /c autoninja -C out/Release
           cmd /c "echo ninja_end"
