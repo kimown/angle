@@ -79,11 +79,13 @@ jobs:
           # patch file in build repo
           cd build
           curl -LO https://raw.githubusercontent.com/kimown/angle/refs/heads/mybranch87_0_4272_0/.github/Fix_gn_gen_with_python3_and_the_Windows_toolchain_on_a_other_drive___In_python3_map_re.patch
-          git inin
-          type toolchain/win/setup_toolchain.py
+          git init
+          # type toolchain/win/setup_toolchain.py
+          git add toolchain/win/setup_toolchain.py
           echo "type_end"
           git apply Fix_gn_gen_with_python3_and_the_Windows_toolchain_on_a_other_drive___In_python3_map_re.patch
-          type toolchain/win/setup_toolchain.py
+          # type toolchain/win/setup_toolchain.py
+          git diff toolchain/win/setup_toolchain.py
           echo "type_patch_end"
           cd ..
 
