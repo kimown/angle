@@ -48,47 +48,25 @@ jobs:
           ls 
           pwd
           ls "/d/a/angle/angle/python3/x64"
-      - name: Build
-        if: false
-        shell: cmd
-        env:
-          PYTHONPATH: D:\a\angle\angle\build;
-        run: |
-          cmd /c python --version
-          set PATH=%cd%\python3\x64;%cd%\depot_tools;%PATH%
-          set PYTHONPATH=%cd%\build;%PYTHONPATH%
-          cmd /c python --version
-          set DEPOT_TOOLS_WIN_TOOLCHAIN=0
-          set vs2019_install=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community
-          set WINDOWSSDKDIR=C:\Program Files (x86)\Windows Kits\10
-          cmd /c python -c "import sys;import os;print(sys.path);print(os.environ['PYTHONPATH']);print(os.environ['PATH'])"
-          cmd /c "echo gclient_start"
-          cmd /c gclient
-          cmd /c "echo gclient_end"
-          cmd /c python scripts/bootstrap.py
-          cmd /c "echo bootstrap_end"
-          cmd /c gclient sync
-          cmd /c "echo sync_end"
-          cmd /c gn gen out/Release --args="is_debug=false angle_build_all=false"
-          cmd /c "echo gen_end"
-          cmd /c autoninja -C out/Release
-          cmd /c "echo ninja_end"
       - name: Build with pwsl
         if: true
         run: |
           python --version
+          python3 -c "import os;print(os.environ)"
+          python -c "import sys;import os;print(sys.path);print(os.environ['PYTHONPATH']);print(os.environ['PATH'])"
 
           # https://github.com/cybik/angle-bootstraps/blob/88076a961fb9be081793379b41ecba33ea51f914/.github/workflows/windows.yml#L21
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
           $env:Path = "$pwd\depot_tools;" + $env:Path
-          $env:Path = "$pwd\python3;" + $env:Path
+          $env:Path = "$pwd\python3\x64;" + $env:Path
           $env:PYTHONPATH = "$pwd\build"
           $env:vs2019_install = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
           $env:WINDOWSSDKDIR = "C:\Program Files (x86)\Windows Kits\10"
-          refreshenv
-          python --version
 
+          python --version
+          python3 -c "import os;print(os.environ)"
           python -c "import sys;import os;print(sys.path);print(os.environ['PYTHONPATH']);print(os.environ['PATH'])"
+          
           echo "gclient_start"
           gclient
           echo "gclient_end"
