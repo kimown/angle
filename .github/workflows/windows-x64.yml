@@ -97,7 +97,7 @@ jobs:
           
           gclient sync
           echo "sync_end"
-          gn gen out/Release --args="is_debug=false target_cpu=x64 angle_build_all=false"
+          gn gen out/Release --args="is_debug=false angle_build_all=false"
           echo "gen_end"
           autoninja -C out/Release
           echo "ninja_end"          
