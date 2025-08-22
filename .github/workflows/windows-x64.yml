@@ -49,6 +49,7 @@ jobs:
           pwd
           ls "/d/a/angle/angle/python3"
       - name: Build
+        if: false
         shell: cmd
         env:
           PYTHONPATH: D:\a\angle\angle\build;
@@ -72,6 +73,34 @@ jobs:
           cmd /c "echo gen_end"
           cmd /c autoninja -C out/Release
           cmd /c "echo ninja_end"
+      - name: Build with pwsl
+        if: true
+        run: |
+          python --version
+
+          # https://github.com/cybik/angle-bootstraps/blob/88076a961fb9be081793379b41ecba33ea51f914/.github/workflows/windows.yml#L21
+          $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
+          $env:Path = "$pwd\depot_tools;" + $env:Path
+          $env:Path = "$pwd\python3;" + $env:Path
+          $env:PYTHONPATH = "$pwd\build"
+          $env:vs2019_install = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
+          $env:WINDOWSSDKDIR = "C:\Program Files (x86)\Windows Kits\10"
+          refreshenv
+          python --version
+
+          python -c "import sys;import os;print(sys.path);print(os.environ['PYTHONPATH']);print(os.environ['PATH'])"
+          echo "gclient_start"
+          gclient
+          echo "gclient_end"
+          python scripts/bootstrap.py
+          echo "bootstrap_end"
+          refreshenv
+          gclient sync
+          echo "sync_end"
+          gn gen out/Release --args="is_debug=false target_cpu=\"x64\" angle_build_all=false"
+          echo "gen_end"
+          autoninja -C out/Release
+          echo "ninja_end"          
       - name: Pack
         shell: bash
         run: |
