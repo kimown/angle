@@ -90,7 +90,7 @@ angle::Result GlslangWrapperVk::TransformSpirV(
     const SpirvBlob &initialSpirvBlob,
     SpirvBlob *shaderCodeOut)
 {
-    const bool removeDebugInfo = !context->getRenderer()->getEnableValidationLayers();
+    const bool removeDebugInfo = false;
 
     return GlslangTransformSpirvCode(
         [context](GlslangError error) { return ErrorHandler(context, error); }, shaderType,

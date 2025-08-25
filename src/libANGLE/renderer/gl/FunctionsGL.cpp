@@ -262,7 +262,7 @@ void FunctionsGL::initializeDummyFunctionsForNULLDriver(const std::set<std::stri
 
     if (extensionSet.count("GL_NV_internalformat_sample_query") > 0)
     {
-        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
+//        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
     }
 }
 #endif  // defined(ANGLE_ENABLE_OPENGL_NULL)

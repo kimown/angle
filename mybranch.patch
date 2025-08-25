@@ -1,0 +1,119 @@
+diff --git a/src/compiler/translator/ShaderLang.cpp b/src/compiler/translator/ShaderLang.cpp
+index ea7dffe27..fa172246e 100644
+--- a/src/compiler/translator/ShaderLang.cpp
++++ b/src/compiler/translator/ShaderLang.cpp
+@@ -718,7 +718,7 @@ unsigned int GetShaderSharedMemorySize(const ShHandle handle)
+ // Can't prefix with just _ because then we might introduce a double underscore, which is not safe
+ // in GLSL (ESSL 3.00.6 section 3.8: All identifiers containing a double underscore are reserved for
+ // use by the underlying implementation). u is short for user-defined.
+-const char kUserDefinedNamePrefix[] = "_u";
++const char kUserDefinedNamePrefix[] = "";
+ 
+ namespace vk
+ {
+diff --git a/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp b/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp
+index 967d318e4..17b23af3d 100644
+--- a/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp
++++ b/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp
+@@ -2789,7 +2789,7 @@ void DispatchTableGL::initProcsSharedExtensions(const std::set<std::string> &ext
+ 
+     if (extensions.count("GL_NV_internalformat_sample_query") != 0)
+     {
+-        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
++//        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
+     }
+ 
+     if (extensions.count("GL_OVR_multiview") != 0)
+@@ -5559,7 +5559,7 @@ void DispatchTableGL::initProcsSharedExtensionsNULL(const std::set<std::string>
+ 
+     if (extensions.count("GL_NV_internalformat_sample_query") != 0)
+     {
+-        getInternalformatSampleivNV = &glGetInternalformatSampleivNVNULL;
++//        getInternalformatSampleivNV = &glGetInternalformatSampleivNVNULL;
+     }
+ 
+     if (extensions.count("GL_OVR_multiview") != 0)
+diff --git a/src/libANGLE/renderer/gl/FunctionsGL.cpp b/src/libANGLE/renderer/gl/FunctionsGL.cpp
+index 4b6f4407a..5161053b8 100644
+--- a/src/libANGLE/renderer/gl/FunctionsGL.cpp
++++ b/src/libANGLE/renderer/gl/FunctionsGL.cpp
+@@ -262,7 +262,7 @@ void FunctionsGL::initializeDummyFunctionsForNULLDriver(const std::set<std::stri
+ 
+     if (extensionSet.count("GL_NV_internalformat_sample_query") > 0)
+     {
+-        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
++//        ASSIGN("glGetInternalformatSampleivNV", getInternalformatSampleivNV);
+     }
+ }
+ #endif  // defined(ANGLE_ENABLE_OPENGL_NULL)
+diff --git a/src/libANGLE/renderer/gl/wgl/DisplayWGL.cpp b/src/libANGLE/renderer/gl/wgl/DisplayWGL.cpp
+index 61f3cf0c9..284db6948 100644
+--- a/src/libANGLE/renderer/gl/wgl/DisplayWGL.cpp
++++ b/src/libANGLE/renderer/gl/wgl/DisplayWGL.cpp
+@@ -302,7 +302,7 @@ egl::Error DisplayWGL::initializeImpl(egl::Display *display)
+         GetWindowThreadProcessId(nativeWindow, &windowProcessId);
+ 
+         // AMD drivers advertise the WGL_NV_DX_interop and WGL_NV_DX_interop2 extensions but fail
+-        mUseDXGISwapChains = !IsAMD(vendor) && (currentProcessId != windowProcessId);
++        mUseDXGISwapChains = !IsAMD(vendor) && (currentProcessId != windowProcessId) && false;
+     }
+     else
+     {
+diff --git a/src/libANGLE/renderer/glslang_wrapper_utils.cpp b/src/libANGLE/renderer/glslang_wrapper_utils.cpp
+index d26095c87..f41ffe20f 100644
+--- a/src/libANGLE/renderer/glslang_wrapper_utils.cpp
++++ b/src/libANGLE/renderer/glslang_wrapper_utils.cpp
+@@ -945,7 +945,7 @@ class SpirvTransformer final : angle::NonCopyable
+         gl::ShaderBitSet allStages;
+         allStages.set();
+         mRemoveEarlyFragmentTestsOptimization = removeEarlyFragmentTestsOptimization;
+-        mRemoveDebugInfo                      = removeDebugInfo;
++        mRemoveDebugInfo                      = false;
+         mBuiltinVariableInfo.activeStages     = allStages;
+     }
+ 
+@@ -1999,7 +1999,30 @@ angle::Result GlslangGetShaderSpirvCode(const GlslangErrorCallback &callback,
+         }
+ 
+         glslang::TIntermediate *intermediate = program.getIntermediate(kShLanguageMap[shaderType]);
+-        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType]);
++
++        // Attach the source code to the SPIR-V for tools like RenderDoc.
++        if(shaderType == gl::ShaderType::Fragment){
++            intermediate->setSourceFile("generated233.frag");
++        } else {
++            intermediate->setSourceFile("generated233.vert");
++        }
++
++        const char *shaderString = shaderSources[shaderType].c_str();
++        int shaderLength         = static_cast<int>(shaderSources[shaderType].size());
++        intermediate->addSourceText(shaderString, shaderLength);
++
++        glslang::SpvOptions options;
++        options.generateDebugInfo = true;
++        options.disableOptimizer = true;
++        options.optimizeSize = false;
++        options.disassemble = false;
++        options.validate = true;
++
++        spv::SpvBuildLogger logger;
++
++//        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType]);
++        glslang::GlslangToSpv(*intermediate, (*spirvBlobsOut)[shaderType], &logger, &options);
++
+     }
+ 
+     return angle::Result::Continue;
+diff --git a/src/libANGLE/renderer/vulkan/GlslangWrapperVk.cpp b/src/libANGLE/renderer/vulkan/GlslangWrapperVk.cpp
+index d5f70bfb9..08431d28f 100644
+--- a/src/libANGLE/renderer/vulkan/GlslangWrapperVk.cpp
++++ b/src/libANGLE/renderer/vulkan/GlslangWrapperVk.cpp
+@@ -91,7 +91,7 @@ angle::Result GlslangWrapperVk::TransformSpirV(
+     const SpirvBlob &initialSpirvBlob,
+     SpirvBlob *shaderCodeOut)
+ {
+-    const bool removeDebugInfo = !context->getRenderer()->getEnableValidationLayers();
++    const bool removeDebugInfo = false;
+ 
+     return GlslangTransformSpirvCode(
+         [context](GlslangError error) { return ErrorHandler(context, error); }, shaderType,
